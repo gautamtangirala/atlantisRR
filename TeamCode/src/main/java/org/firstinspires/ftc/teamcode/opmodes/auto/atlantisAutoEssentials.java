@@ -143,13 +143,14 @@ public class atlantisAutoEssentials extends LinearOpMode {
     }
 
     public void depositGrab(double pos){
-        intakeClawGrabLeft.setPosition(pos);
-        intakeClawGrabRight.setPosition(pos);
+        depositClawGrabRight.setPosition(pos);
+        depositClawGrabLeft.setPosition(pos);
     }
 
     public Action openDeposit() {
         return new InstantAction(() -> { depositGrab(depositClawOpen); });
     }
+
 
     public Action closeDeposit() {
         return new InstantAction(() -> { depositGrab(depositClawClose); });
@@ -164,6 +165,9 @@ public class atlantisAutoEssentials extends LinearOpMode {
     }
 
 
+    public Action depositTransferAction(double pos) {
+        return new InstantAction(() -> { depositTransfer.setPosition(pos); });
+    }
 
 
 
@@ -197,6 +201,7 @@ public class atlantisAutoEssentials extends LinearOpMode {
 
 
 
+
     public Action moveSlideTop(){
         return new InstantAction(() -> {
             vertSlides.setTargetPosition(highBasketHeight);
@@ -221,7 +226,7 @@ public class atlantisAutoEssentials extends LinearOpMode {
 
     public Action moveSlideBottom(){
         return new InstantAction(() -> {
-            depositTransfer.setPosition(depositTransferOut);
+            depositTransfer.setPosition(0.5);
             vertSlides.setTargetPosition(5);
             vertSlides.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
             vertSlides.setPower(1); });
