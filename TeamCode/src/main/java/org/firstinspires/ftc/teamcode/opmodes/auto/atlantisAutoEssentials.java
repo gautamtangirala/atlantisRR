@@ -38,6 +38,7 @@ public class atlantisAutoEssentials extends LinearOpMode {
     public Servo intakeClawGrabRight;
     public Servo intakeClawTilt;
     public Servo intakeTransfer;
+    public Servo intakeClawWrist;
 
     public Servo depositTransfer;
     public Servo depositClawGrabRight;
@@ -50,7 +51,7 @@ public class atlantisAutoEssentials extends LinearOpMode {
 
 
     //Variables
-    double depositClawClose = 0.435;
+    double depositClawClose = 0.525;
     double depositClawOpen = 0.1;
 
     double depositTransferIn = 0.15;
@@ -111,18 +112,17 @@ public class atlantisAutoEssentials extends LinearOpMode {
         horizSlides.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
 
-//        intakeTransfer = hardwareMap.get(Servo.class, "intakeTransfer");
-//
-//        intakeClawGrabRight = hardwareMap.get(Servo.class, "iCGR");
-//        intakeClawGrabLeft = hardwareMap.get(Servo.class, "iCGL");
-        //intakeClawGrabRight.setDirection(Servo.Direction.REVERSE); // use in case needed
-
+        intakeClawTilt = hardwareMap.get(Servo.class, "intakeClawTilt");
+        intakeClawWrist = hardwareMap.get(Servo.class, "intakeClawWrist");
+        intakeTransfer = hardwareMap.get(Servo.class, "intakeTransfer");
+        intakeClawGrabLeft = hardwareMap.get(Servo.class, "iCGL");
+        intakeClawGrabRight = hardwareMap.get(Servo.class, "iCGR");
+        intakeClawGrabRight.setDirection(Servo.Direction.REVERSE);
 
         depositTransfer = hardwareMap.get(Servo.class, "depositTransfer");
-
         depositClawGrabLeft = hardwareMap.get(Servo.class, "dCGL");
         depositClawGrabRight = hardwareMap.get(Servo.class, "dCGR");
-        //depositClawGrabRight.setDirection(Servo.Direction.REVERSE); // use in case needed
+        depositClawGrabLeft.setDirection(Servo.Direction.REVERSE);
 
     }
 
