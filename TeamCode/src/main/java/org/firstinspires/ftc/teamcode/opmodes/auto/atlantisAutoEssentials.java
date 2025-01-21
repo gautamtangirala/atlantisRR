@@ -1,8 +1,10 @@
 package org.firstinspires.ftc.teamcode.opmodes.auto;
 
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.InstantAction;
 import com.acmerobotics.roadrunner.ParallelAction;
+import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -51,29 +53,32 @@ public class atlantisAutoEssentials extends LinearOpMode {
 
 
     //Variables
-    double depositClawClose = 0.525;
-    double depositClawOpen = 0.1;
+    public double depositClawClose = 0.525;
+    public double depositClawOpen = 0.1;
 
-    double depositTransferIn = 0.15;
-    double depositTransferOut = 1;
 
-    double intakeClawClose = 0.525;
-    double intakeClawOpen = 0;
+    public double depositTransferIn = 0.15;
+    public double depositTransferOut = 1;
+    public double slamSpeciPos = 1;
 
-    double intakeTransferOut = 0.975;
-    double intakeTransferIn = 0.4;
+    public double intakeClawClose = 0.525;
+    public double intakeClawOpen = 0;
 
-    int highRungHeight = 570;
-    int highBasketHeight = 2500;
 
-    double intakeWristVert = 0.525;
-    double intakeWristHoriz = 0;
+    public double intakeTransferOut = 0.975;
+    public double intakeTransferIn = 0.4;
 
-    double turnMulti = 0.6;
-    double slowedDownMulti = 0.8;
+    public int highRungHeight = 570;
+    public int highBasketHeight = 2550;
 
-    boolean specimenMode = true;
-    boolean sampleMode = false;
+    public  double intakeWristVert = 0.525;
+    public double intakeWristHoriz = 0;
+
+    public double turnMulti = 0.6;
+    public  double slowedDownMulti = 0.8;
+
+    public boolean specimenMode = true;
+    public  boolean sampleMode = false;
 
 
 
@@ -173,7 +178,7 @@ public class atlantisAutoEssentials extends LinearOpMode {
 
     public Action placeSpecimen(){
         return new InstantAction(() -> {
-        depositTransfer.setPosition(0.8);}
+        depositTransfer.setPosition(slamSpeciPos);}
         );
     }
 
@@ -230,6 +235,78 @@ public class atlantisAutoEssentials extends LinearOpMode {
             vertSlides.setTargetPosition(5);
             vertSlides.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
             vertSlides.setPower(1); });
+    }
+
+
+    public Action horizSlideOut(){
+        return new InstantAction(() -> {
+            openIntake();
+            intakeTransfer.setPosition(0.9);
+            intakeClawTilt.setPosition(0.05);
+            horizSlides.setTargetPosition(1240);
+            horizSlides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            horizSlides.setPower(1);
+        });
+    }
+
+
+    public Action fourthBlockWrist(){
+        return new InstantAction(() ->{
+            intakeClawWrist.setPosition(0.25);
+        });
+    }
+
+
+    public Action clawPickup(){
+
+
+        return new InstantAction(() -> {
+            openIntake();
+            depositTransfer.setPosition(depositTransferIn);
+            openDeposit();
+            intakeTransfer.setPosition(intakeTransferOut);
+            intakeClawTilt.setPosition(0.05);
+            horizSlides.setTargetPosition(1240);
+            horizSlides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            horizSlides.setPower(1);
+        });
+
+
+    }
+
+
+
+    public Action transfer(int state){
+        if (state == 1){
+            return new InstantAction(() ->{
+                intakeTransfer.setPosition(intakeTransferIn);
+                intakeClawTilt.setPosition(1);
+                intakeClawWrist.setPosition(intakeWristVert);
+
+                depositTransfer.setPosition(depositTransferIn);
+                openDeposit();
+
+                vertSlides.setTargetPosition(0);
+                vertSlides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                vertSlides.setPower(1);
+
+                horizSlides.setTargetPosition(290);
+                horizSlides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                horizSlides.setPower(1);
+            });
+        } else if (state == 2) {
+            return new InstantAction(() ->{
+                horizSlides.setTargetPosition(110);
+                horizSlides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                horizSlides.setPower(1);
+            });
+        } else if (state == 3) {
+            return new InstantAction(() -> {
+            depositTransfer.setPosition(0.5);
+            intakeTransfer.setPosition(intakeTransferIn+0.1);});
+        } else {
+            return null;
+        }
     }
 
 

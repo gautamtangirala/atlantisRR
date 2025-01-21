@@ -11,9 +11,8 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import org.firstinspires.ftc.teamcode.rrfiles.PinpointDrive;
 
 
-@Autonomous //(preselectTeleOp = "tele")
+@Autonomous (preselectTeleOp = "atlantisTele")
 public class fourSpeci2 extends atlantisAutoEssentials {
-
 
 
     @Override
@@ -44,8 +43,6 @@ public class fourSpeci2 extends atlantisAutoEssentials {
         Pose2d pickupPose = new Pose2d(pickupX, pickupY, pickupAngle);
 
 
-
-
         Action hangPreload = drive.actionBuilder(startPose)
                 .afterTime(0, moveSlideSpeci())
                 .strafeToLinearHeading(dropVector, dropAngle)
@@ -58,7 +55,7 @@ public class fourSpeci2 extends atlantisAutoEssentials {
                 .afterTime(0, moveSlideBottom())
                 .afterTime(1, depositTransferAction(depositTransferOut))
                 .splineToLinearHeading(new Pose2d(35, -30, Math.toRadians(90)), Math.toRadians(90))
-                .splineToConstantHeading(new Vector2d(46,-12.5),Math.toRadians(270))
+                .splineToConstantHeading(new Vector2d(46, -12.5), Math.toRadians(270))
                 .strafeToConstantHeading(new Vector2d(46, -48))
                 .strafeToConstantHeading(new Vector2d(48, -10))
                 .splineToConstantHeading(new Vector2d(60, -15), Math.toRadians(270))
@@ -68,21 +65,20 @@ public class fourSpeci2 extends atlantisAutoEssentials {
                 .waitSeconds(0.25)
                 .stopAndAdd(closeDeposit())
                 .waitSeconds(0.25)
-   //             .splineToLinearHeading(pickupPose, Math.toRadians(270))
+                //             .splineToLinearHeading(pickupPose, Math.toRadians(270))
                 .build();
-
 
 
         Action hang2 = drive.actionBuilder(pickupPose)
                 .afterTime(0, moveSlideSpeci())
 
-                .strafeToLinearHeading(new Vector2d(dropX-speciIncrement, dropY), dropAngle)
+                .strafeToLinearHeading(new Vector2d(dropX - speciIncrement, dropY), dropAngle)
                 .stopAndAdd(placeSpecimen())
                 .waitSeconds(0.25)
                 .stopAndAdd(openDeposit())
                 .build();
 
-        Action pickup2 = drive.actionBuilder(new Pose2d(dropX-speciIncrement, dropY, dropAngle))
+        Action pickup2 = drive.actionBuilder(new Pose2d(dropX - speciIncrement, dropY, dropAngle))
                 .afterTime(0, moveSlideBottom())
                 .afterTime(1, depositTransferAction(depositTransferOut))
                 .strafeToLinearHeading(new Vector2d(36, -53), Math.toRadians(90))
@@ -94,13 +90,13 @@ public class fourSpeci2 extends atlantisAutoEssentials {
 
         Action hang3 = drive.actionBuilder(pickupPose)
                 .afterTime(0, moveSlideSpeci())
-                .strafeToLinearHeading(new Vector2d(dropX+speciIncrement, dropY), dropAngle)
+                .strafeToLinearHeading(new Vector2d(dropX + speciIncrement, dropY), dropAngle)
                 .stopAndAdd(placeSpecimen())
                 .waitSeconds(0.25)
                 .stopAndAdd(openDeposit())
                 .build();
 
-        Action pickup3 = drive.actionBuilder(new Pose2d(dropX+speciIncrement, dropY, dropAngle))
+        Action pickup3 = drive.actionBuilder(new Pose2d(dropX + speciIncrement, dropY, dropAngle))
                 .afterTime(0, moveSlideBottom())
                 .afterTime(1, depositTransferAction(depositTransferOut))
                 .strafeToLinearHeading(new Vector2d(36, -53), Math.toRadians(90))
@@ -119,9 +115,9 @@ public class fourSpeci2 extends atlantisAutoEssentials {
                 .build();
 
 
-        Action park = drive.actionBuilder((new Pose2d(dropX+speciIncrement+speciIncrement, dropY, dropAngle)))
+        Action park = drive.actionBuilder((new Pose2d(dropX + speciIncrement + speciIncrement, dropY, dropAngle)))
                 .afterTime(0, moveSlideBottom())
-                .strafeToConstantHeading(new Vector2d(pickupX + 10, pickupY+3))
+                .strafeToConstantHeading(new Vector2d(pickupX + 10, pickupY + 3))
                 .build();
 
         depositGrab(depositClawClose);
@@ -129,7 +125,6 @@ public class fourSpeci2 extends atlantisAutoEssentials {
         intakeTransfer.setPosition(intakeTransferIn);
 
         waitForStart();
-
 
 
         Actions.runBlocking(
