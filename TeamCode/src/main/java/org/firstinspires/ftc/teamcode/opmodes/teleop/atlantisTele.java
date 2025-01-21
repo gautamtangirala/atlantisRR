@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 
-@TeleOp
+@TeleOp(name = "atlantisTele")
 public class atlantisTele extends LinearOpMode {
     public DcMotorEx horizSlides;
     public DcMotorEx vertSlides;
@@ -33,15 +33,18 @@ public class atlantisTele extends LinearOpMode {
 
     double depositTransferIn = 0.15;
     double depositTransferOut = 1;
+    double slamSpeciPos = 1;
 
     double intakeClawClose = 0.525;
     double intakeClawOpen = 0;
 
-    double intakeTransferOut = 0.975;
+    double intakeTransferOut = 1;
     double intakeTransferIn = 0.4;
 
     int highRungHeight = 570;
     int highBasketHeight = 2500;
+
+    int horizTransferPos = 110;
 
     double intakeWristVert = 0.525;
     double intakeWristHoriz = 0;
@@ -100,7 +103,7 @@ public class atlantisTele extends LinearOpMode {
             } else if (sampleMode) {
                 // Sample Mode Controls
                 if (gamepad2.dpad_up && transferState == TransferState.IDLE) {
-                    highBasket();
+                    startHighBasket();
                 } else if (gamepad2.right_bumper && transferState == TransferState.IDLE) {
                     startTransfer();
                 } else if (gamepad2.dpad_down) {
@@ -145,6 +148,7 @@ public class atlantisTele extends LinearOpMode {
             handleSlamSpecimen();
             handleTransfer();
             handleHorizontalSlidesOut();
+            handleHighBasket();
 
             // Telemetry
             telemetry.addData("MODE", specimenMode ? "SPECIMEN" : sampleMode ? "SAMPLE" : "NONE");
@@ -236,6 +240,7 @@ public class atlantisTele extends LinearOpMode {
             case START:
                 // Initialize movement
                 intakeClaw(intakeClawOpen);
+                depositTransfer.setPosition(depositTransferIn);
                 intakeTransfer.setPosition(0.75);
                 intakeClawTilt.setPosition(0.05);
                 horizSlides.setTargetPosition(1240);
@@ -305,7 +310,7 @@ public class atlantisTele extends LinearOpMode {
                 break;
 
             case WAIT_OPEN:
-                if (pickupTimer.milliseconds() > 300) {
+                if (pickupTimer.milliseconds() > 500) {
                     intakeClaw(intakeClawClose);
                     pickupTimer.reset();
                     pickupState = PickupState.WAIT_CLOSE;
@@ -360,6 +365,10 @@ public class atlantisTele extends LinearOpMode {
                 depositTransfer.setPosition(depositTransferIn);
                 depositClaw(depositClawOpen);
 
+                vertSlides.setTargetPosition(0);
+                vertSlides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                vertSlides.setPower(1);
+
                 horizSlides.setTargetPosition(290);
                 horizSlides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 horizSlides.setPower(1);
@@ -370,7 +379,7 @@ public class atlantisTele extends LinearOpMode {
             case DEP_SLIDES:
                 if(transferTimer.milliseconds() > 700){
 
-                    horizSlides.setTargetPosition(120);
+                    horizSlides.setTargetPosition(110);
                     horizSlides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     horizSlides.setPower(1);
                     transferTimer.reset();
@@ -380,7 +389,7 @@ public class atlantisTele extends LinearOpMode {
 
             case WAIT_SLIDES:
                 // Wait for slides to reach the target position or time out
-                if (horizSlides.getCurrentPosition() <= 120 || transferTimer.milliseconds() > 550) {
+                if (horizSlides.getCurrentPosition() <= 110 || transferTimer.milliseconds() > 550) {
                     depositClaw(depositClawClose);
                     transferTimer.reset();
                     transferState = TransferState.WAIT_CLOSE_CLAW;
@@ -397,12 +406,7 @@ public class atlantisTele extends LinearOpMode {
 
             case WAIT_OPEN_CLAW:
                 if (transferTimer.milliseconds() > 250) {
-                    if(sampleMode) {
-                        depositTransfer.setPosition(0.5);
-                    }
-                    else{
-                        depositTransfer.setPosition(depositTransferOut);
-                    }
+                    depositTransfer.setPosition(0.5);
                     intakeTransfer.setPosition(intakeTransferIn+0.1);
                     transferState = TransferState.DONE;
                 }
@@ -426,13 +430,49 @@ public class atlantisTele extends LinearOpMode {
         vertSlides.setPower(1);
     }
 
-    public void highBasket() {
-        vertSlides.setTargetPosition(highBasketHeight); // Bucket deposit height
-        vertSlides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        vertSlides.setPower(1);
-
-        depositTransfer.setPosition(0.7);
+    public enum HighBasketState {
+        IDLE,         // State when the process is not active
+        START,        // Initial state
+        WAIT_FOR_SLIDE, // Waiting for the slides to reach position
+        DONE          // Completed state
     }
+
+    private HighBasketState basketState = HighBasketState.IDLE;
+    private ElapsedTime basketTimer = new ElapsedTime(); // Timer for optional timeout
+
+    public void startHighBasket() {
+        basketState = HighBasketState.START;
+    }
+
+    public void handleHighBasket() {
+        switch (basketState) {
+            case IDLE:
+                // Do nothing when idle
+                break;
+
+            case START:
+                // Start vertical slides movement
+                vertSlides.setTargetPosition(highBasketHeight); // Bucket deposit height
+                vertSlides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                vertSlides.setPower(1);
+                basketState = HighBasketState.WAIT_FOR_SLIDE;
+                break;
+
+            case WAIT_FOR_SLIDE:
+                // Wait until the slides reach the target position or exceed 2500
+                if (vertSlides.getCurrentPosition() > 2500 || !vertSlides.isBusy()) {
+                    depositTransfer.setPosition(0.7);
+                    basketState = HighBasketState.DONE;
+                }
+                break;
+
+            case DONE:
+                // Task complete, reset state to idle
+                basketState = HighBasketState.IDLE;
+                break;
+        }
+    }
+
 
 
     //Slam the Specimen
@@ -460,13 +500,13 @@ public class atlantisTele extends LinearOpMode {
                 break;
 
             case START:
-                depositTransfer.setPosition(0.8);
+                depositTransfer.setPosition(slamSpeciPos);
                 slamTimer.reset();
                 slamState = SlamState.OPEN_CLAW;
                 break;
 
             case OPEN_CLAW:
-                if (slamTimer.milliseconds() > 350) {
+                if (slamTimer.milliseconds() > 500) {
                     depositClaw(depositClawOpen);
                     depositTransfer.setPosition(0.7);
                     slamState = SlamState.DONE;
