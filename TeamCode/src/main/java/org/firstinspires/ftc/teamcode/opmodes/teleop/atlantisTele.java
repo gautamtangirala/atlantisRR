@@ -31,7 +31,7 @@ public class atlantisTele extends LinearOpMode {
     double depositClawClose = 0.435;
     double depositClawOpen = 0.1;
 
-    double depositTransferIn = 0.15;
+    double depositTransferIn = 0.1725;
     double depositTransferOut = 1;
     double slamSpeciPos = 1;
 

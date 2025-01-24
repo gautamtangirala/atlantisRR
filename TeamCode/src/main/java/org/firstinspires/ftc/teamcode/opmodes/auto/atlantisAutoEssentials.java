@@ -57,7 +57,7 @@ public class atlantisAutoEssentials extends LinearOpMode {
     public double depositClawOpen = 0.1;
 
 
-    public double depositTransferIn = 0.15;
+    public double depositTransferIn = 0.1725;
     public double depositTransferOut = 1;
     public double slamSpeciPos = 1;
 
@@ -65,7 +65,7 @@ public class atlantisAutoEssentials extends LinearOpMode {
     public double intakeClawOpen = 0;
 
 
-    public double intakeTransferOut = 0.975;
+    public double intakeTransferOut = 1;
     public double intakeTransferIn = 0.4;
 
     public int highRungHeight = 570;
@@ -237,6 +237,15 @@ public class atlantisAutoEssentials extends LinearOpMode {
             vertSlides.setPower(1); });
     }
 
+    public Action moveSlidePark(){
+        return new InstantAction(() -> {
+            depositTransfer.setPosition(0.5);
+            vertSlides.setTargetPosition(400);
+            vertSlides.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+            vertSlides.setPower(1); });
+    }
+
+
 
     public Action horizSlideOut(){
         return new InstantAction(() -> {
@@ -250,9 +259,9 @@ public class atlantisAutoEssentials extends LinearOpMode {
     }
 
 
-    public Action fourthBlockWrist(){
+    public Action moveWrist(double pos){
         return new InstantAction(() ->{
-            intakeClawWrist.setPosition(0.25);
+            intakeClawWrist.setPosition(pos);
         });
     }
 
