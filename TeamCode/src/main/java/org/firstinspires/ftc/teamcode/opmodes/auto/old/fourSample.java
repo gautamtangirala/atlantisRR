@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.opmodes.auto;
+package org.firstinspires.ftc.teamcode.opmodes.auto.old;
 
 
 import com.acmerobotics.roadrunner.Action;
@@ -7,10 +7,13 @@ import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
+import org.firstinspires.ftc.teamcode.opmodes.auto.atlantisAutoEssentials;
 import org.firstinspires.ftc.teamcode.rrfiles.PinpointDrive;
 
 
+@Disabled
 @Autonomous (preselectTeleOp = "atlantisTele")
 public class fourSample extends atlantisAutoEssentials {
 
@@ -22,10 +25,10 @@ public class fourSample extends atlantisAutoEssentials {
         initDrive();
         initSubsystems();
 
-        Pose2d startPose = new Pose2d(-37, -63, Math.toRadians(0));
+        Pose2d startPose = new Pose2d(-40, -62.625, Math.toRadians(270));
         PinpointDrive drive = new PinpointDrive(hardwareMap, startPose);
 
-        double dropX = -56.5, dropY = -56.5, dropAngle = Math.toRadians(45);
+        double dropX = -57, dropY = -56, dropAngle = Math.toRadians(45);
 
         Vector2d dropVector = new Vector2d(dropX, dropY);
         Pose2d dropPose = new Pose2d(dropX, dropY, dropAngle);
@@ -50,7 +53,7 @@ public class fourSample extends atlantisAutoEssentials {
         Action block2 = drive.actionBuilder(dropPose)
                 .afterTime(0.1,moveSlideBottom())
                 .afterTime(0, horizSlideOut())
-                .strafeToLinearHeading(new Vector2d(-47.25, -50), Math.toRadians(90))
+                .strafeToLinearHeading(new Vector2d(-49.75, -50.5), Math.toRadians(90))
                 .waitSeconds(0.5)
 
                 //pickup block
@@ -85,7 +88,7 @@ public class fourSample extends atlantisAutoEssentials {
         Action block3 = drive.actionBuilder(dropPose)
                 .afterTime(0.1,moveSlideBottom())
                 .afterTime(0, horizSlideOut())
-                .strafeToLinearHeading(new Vector2d(-57, -50), Math.toRadians(90))
+                .strafeToLinearHeading(new Vector2d(-59.75, -50.75), Math.toRadians(90))
                 .waitSeconds(0.5)
 
                 //pickup block
@@ -120,8 +123,8 @@ public class fourSample extends atlantisAutoEssentials {
         Action block4 = drive.actionBuilder(dropPose)
                 .afterTime(0.1,moveSlideBottom())
                 .afterTime(0, horizSlideOut())
-                .afterTime(0, fourthBlockWrist())
-                .strafeToLinearHeading(new Vector2d(-49.5, -43), Math.toRadians(135))
+                .afterTime(0, moveWrist(0.3))
+                .strafeToLinearHeading(new Vector2d(-53.25, -42.5), Math.toRadians(135))
                 .waitSeconds(0.5)
 
                 //pickup block
@@ -154,8 +157,7 @@ public class fourSample extends atlantisAutoEssentials {
 
 
         Action end = drive.actionBuilder(dropPose)
-                .strafeToConstantHeading(new Vector2d(-52, -45))
-                .afterTime(0,moveSlideBottom())
+                .afterTime(0.5,moveSlideBottom())
                 .splineToLinearHeading(new Pose2d(-25, -5, Math.toRadians(0)), Math.toRadians(0))
                 .build();
 
