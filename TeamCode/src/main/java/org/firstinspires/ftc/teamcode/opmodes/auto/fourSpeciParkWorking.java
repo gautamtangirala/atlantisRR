@@ -37,7 +37,7 @@ public class fourSpeciParkWorking extends atlantisAutoEssentials {
         Vector2d dropVector = new Vector2d(dropX, dropY);
         Pose2d dropPose = new Pose2d(dropX, dropY, dropAngle);
 
-        double pickupX = 38, pickupY = -55, pickupAngle = Math.toRadians(90);
+        double pickupX = 38, pickupY = -57, pickupAngle = Math.toRadians(90);
 
         Vector2d pickupVector = new Vector2d(pickupX, pickupY);
 
@@ -61,7 +61,7 @@ public class fourSpeciParkWorking extends atlantisAutoEssentials {
                 .splineToConstantHeading(new Vector2d(60, -15), Math.toRadians(270))
                 .afterTime(0, depositTransferAction(depositTransferOut))
                 .splineToConstantHeading(new Vector2d(59, -45), Math.toRadians(270))
-                .strafeTo(new Vector2d(59, pickupY+0.5))
+                .strafeTo(new Vector2d(59, pickupY+1.5))
                 .waitSeconds(0.75)
                 .stopAndAdd(closeDeposit())
                 .waitSeconds(0.25)
@@ -117,7 +117,7 @@ public class fourSpeciParkWorking extends atlantisAutoEssentials {
 
         Action park = drive.actionBuilder((new Pose2d(dropX + speciIncrement + speciIncrement, dropY, dropAngle)))
                 .afterTime(0, moveSlideBottom())
-                .splineToConstantHeading(new Vector2d(pickupX + 5, pickupY + 4), Math.toRadians(90))
+                .splineToConstantHeading(new Vector2d(pickupX + 10, pickupY + 5), Math.toRadians(90))
                 .build();
 
         depositGrab(depositClawClose);

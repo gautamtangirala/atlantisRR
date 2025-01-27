@@ -53,23 +53,22 @@ public class atlantisAutoEssentials extends LinearOpMode {
 
 
     //Variables
-    public double depositClawClose = 0.525;
+    public  double depositClawClose = 0.45;
     public double depositClawOpen = 0.1;
-
 
     public double depositTransferIn = 0.1725;
     public double depositTransferOut = 1;
     public double slamSpeciPos = 1;
 
-    public double intakeClawClose = 0.525;
-    public double intakeClawOpen = 0;
+    public double intakeClawClose = 0.45;
+    public  double intakeClawOpen = 0.1;
 
 
     public double intakeTransferOut = 1;
     public double intakeTransferIn = 0.4;
 
-    public int highRungHeight = 570;
-    public int highBasketHeight = 2550;
+    public int highRungHeight = 218;
+    public int highBasketHeight = 960;
 
     public  double intakeWristVert = 0.525;
     public double intakeWristHoriz = 0;
@@ -77,8 +76,7 @@ public class atlantisAutoEssentials extends LinearOpMode {
     public double turnMulti = 0.6;
     public  double slowedDownMulti = 0.8;
 
-    public boolean specimenMode = true;
-    public  boolean sampleMode = false;
+
 
 
 
@@ -222,12 +220,6 @@ public class atlantisAutoEssentials extends LinearOpMode {
             vertSlides.setPower(1);  });
     }
 
-    public Action moveSlideMid(){
-        return new InstantAction(() -> {
-            vertSlides.setTargetPosition(250);
-            vertSlides.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-            vertSlides.setPower(1); });
-    }
 
     public Action moveSlideBottom(){
         return new InstantAction(() -> {
@@ -237,20 +229,28 @@ public class atlantisAutoEssentials extends LinearOpMode {
             vertSlides.setPower(1); });
     }
 
+    public Action moveSlideSpeciPickup(){
+        return new InstantAction(() -> {
+            depositTransfer.setPosition(0.5);
+            vertSlides.setTargetPosition(26);
+            vertSlides.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+            vertSlides.setPower(1); });
+    }
+
     public Action moveSlidePark(){
         return new InstantAction(() -> {
             depositTransfer.setPosition(0.5);
-            vertSlides.setTargetPosition(400);
+            vertSlides.setTargetPosition(151);
             vertSlides.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
             vertSlides.setPower(1); });
     }
 
 
 
-    public Action horizSlideOut(){
+    public Action horizSlideOut(boolean sub) {
         return new InstantAction(() -> {
             openIntake();
-            intakeTransfer.setPosition(0.9);
+            intakeTransfer.setPosition(sub ? 0.75 : 0.9);
             intakeClawTilt.setPosition(0.05);
             horizSlides.setTargetPosition(1240);
             horizSlides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -274,10 +274,7 @@ public class atlantisAutoEssentials extends LinearOpMode {
             depositTransfer.setPosition(depositTransferIn);
             openDeposit();
             intakeTransfer.setPosition(intakeTransferOut);
-            intakeClawTilt.setPosition(0.05);
-            horizSlides.setTargetPosition(1240);
-            horizSlides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            horizSlides.setPower(1);
+            intakeClawTilt.setPosition(0.075);
         });
 
 

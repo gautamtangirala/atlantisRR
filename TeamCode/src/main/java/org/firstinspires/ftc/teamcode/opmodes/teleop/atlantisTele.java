@@ -28,23 +28,25 @@ public class atlantisTele extends LinearOpMode {
 
 
     //Variables
-    double depositClawClose = 0.435;
+    double depositClawClose = 0.45;
     double depositClawOpen = 0.1;
 
     double depositTransferIn = 0.1725;
     double depositTransferOut = 1;
     double slamSpeciPos = 1;
 
-    double intakeClawClose = 0.525;
-    double intakeClawOpen = 0;
+    double intakeClawClose = 0.45;
+    double intakeClawOpen = 0.1;
 
     double intakeTransferOut = 1;
     double intakeTransferIn = 0.4;
 
-    int highRungHeight = 570;
-    int highBasketHeight = 2500;
+    int highRungHeight = 218;
+    int highBasketHeight = 950;
+
 
     int horizTransferPos = 110;
+    int horizOutPos = 1240;
 
     double intakeWristVert = 0.525;
     double intakeWristHoriz = 0;
@@ -243,7 +245,9 @@ public class atlantisTele extends LinearOpMode {
                 depositTransfer.setPosition(depositTransferIn);
                 intakeTransfer.setPosition(0.75);
                 intakeClawTilt.setPosition(0.05);
-                horizSlides.setTargetPosition(1240);
+                horizSlides.setTargetPosition(horizOutPos
+
+                );
                 horizSlides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 horizSlides.setPower(1);
                 slidesTimer.reset(); // Reset the timer for non-blocking delay
@@ -304,7 +308,7 @@ public class atlantisTele extends LinearOpMode {
             case START:
                 intakeClaw(intakeClawOpen);
                 intakeTransfer.setPosition(intakeTransferOut);
-                intakeClawTilt.setPosition(0.05);
+                intakeClawTilt.setPosition(0.075);
                 pickupTimer.reset();
                 pickupState = PickupState.WAIT_OPEN;
                 break;
@@ -320,6 +324,7 @@ public class atlantisTele extends LinearOpMode {
             case WAIT_CLOSE:
                 if (pickupTimer.milliseconds() > 500) {
                     intakeTransfer.setPosition(intakeTransferOut-0.1);
+                    intakeClawTilt.setPosition(0.05);
                     pickupState = PickupState.DONE;
                 }
                 break;
@@ -369,7 +374,7 @@ public class atlantisTele extends LinearOpMode {
                 vertSlides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 vertSlides.setPower(1);
 
-                horizSlides.setTargetPosition(290);
+                horizSlides.setTargetPosition((int)(horizTransferPos* 2.5));
                 horizSlides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 horizSlides.setPower(1);
                 transferTimer.reset();
@@ -379,7 +384,7 @@ public class atlantisTele extends LinearOpMode {
             case DEP_SLIDES:
                 if(transferTimer.milliseconds() > 700){
 
-                    horizSlides.setTargetPosition(110);
+                    horizSlides.setTargetPosition(horizTransferPos);
                     horizSlides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     horizSlides.setPower(1);
                     transferTimer.reset();
@@ -389,7 +394,7 @@ public class atlantisTele extends LinearOpMode {
 
             case WAIT_SLIDES:
                 // Wait for slides to reach the target position or time out
-                if (horizSlides.getCurrentPosition() <= 110 || transferTimer.milliseconds() > 550) {
+                if (!horizSlides.isBusy() || transferTimer.milliseconds() > 550) {
                     depositClaw(depositClawClose);
                     transferTimer.reset();
                     transferState = TransferState.WAIT_CLOSE_CLAW;
@@ -397,17 +402,17 @@ public class atlantisTele extends LinearOpMode {
                 break;
 
             case WAIT_CLOSE_CLAW:
-                if (transferTimer.milliseconds() > 350) {
+                if (transferTimer.milliseconds() > 200) {
                     intakeClaw(intakeClawOpen);
+                    intakeTransfer.setPosition(intakeTransferIn+0.3);
                     transferTimer.reset();
                     transferState = TransferState.WAIT_OPEN_CLAW;
                 }
                 break;
 
             case WAIT_OPEN_CLAW:
-                if (transferTimer.milliseconds() > 250) {
+                if (transferTimer.milliseconds() > 150) {
                     depositTransfer.setPosition(0.5);
-                    intakeTransfer.setPosition(intakeTransferIn+0.1);
                     transferState = TransferState.DONE;
                 }
                 break;
@@ -422,7 +427,13 @@ public class atlantisTele extends LinearOpMode {
 
 
     public void highRung() {
-        depositTransfer.setPosition(0.5);
+        if(vertSlides.getCurrentPosition() > 550){
+            depositTransfer.setPosition(0.7);
+        }
+        else{
+            depositTransfer.setPosition(0.5);
+        }
+
         depositClaw(depositClawClose);
 
         vertSlides.setTargetPosition(highRungHeight);
@@ -508,7 +519,6 @@ public class atlantisTele extends LinearOpMode {
             case OPEN_CLAW:
                 if (slamTimer.milliseconds() > 500) {
                     depositClaw(depositClawOpen);
-                    depositTransfer.setPosition(0.7);
                     slamState = SlamState.DONE;
                 }
                 break;
@@ -523,6 +533,9 @@ public class atlantisTele extends LinearOpMode {
     public void specimenPickup() {
         depositClaw(depositClawOpen);
         depositTransfer.setPosition(0.975);
+        vertSlides.setTargetPosition(50);
+        vertSlides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        vertSlides.setPower(1);
     }
 
     public void homePosition() {

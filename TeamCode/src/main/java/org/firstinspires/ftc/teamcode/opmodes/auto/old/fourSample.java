@@ -52,7 +52,7 @@ public class fourSample extends atlantisAutoEssentials {
 
         Action block2 = drive.actionBuilder(dropPose)
                 .afterTime(0.1,moveSlideBottom())
-                .afterTime(0, horizSlideOut())
+                .afterTime(0, horizSlideOut(false))
                 .strafeToLinearHeading(new Vector2d(-49.75, -50.5), Math.toRadians(90))
                 .waitSeconds(0.5)
 
@@ -75,7 +75,7 @@ public class fourSample extends atlantisAutoEssentials {
 
                 //drop block
                 .afterTime(0, moveSlideTop())
-                .afterTime(1, horizSlideOut())
+                .afterTime(1, horizSlideOut(false))
                 .strafeToLinearHeading(dropVector, dropAngle)
                 .waitSeconds(1)
                 .stopAndAdd(depositTransferAction(0.7))
@@ -87,7 +87,7 @@ public class fourSample extends atlantisAutoEssentials {
 
         Action block3 = drive.actionBuilder(dropPose)
                 .afterTime(0.1,moveSlideBottom())
-                .afterTime(0, horizSlideOut())
+                .afterTime(0, horizSlideOut(false))
                 .strafeToLinearHeading(new Vector2d(-59.75, -50.75), Math.toRadians(90))
                 .waitSeconds(0.5)
 
@@ -110,7 +110,7 @@ public class fourSample extends atlantisAutoEssentials {
 
                 //drop block
                 .afterTime(0, moveSlideTop())
-                .afterTime(1, horizSlideOut())
+                .afterTime(1, horizSlideOut(false))
                 .strafeToLinearHeading(dropVector, dropAngle)
                 .waitSeconds(1)
                 .stopAndAdd(depositTransferAction(0.7))
@@ -122,7 +122,7 @@ public class fourSample extends atlantisAutoEssentials {
 
         Action block4 = drive.actionBuilder(dropPose)
                 .afterTime(0.1,moveSlideBottom())
-                .afterTime(0, horizSlideOut())
+                .afterTime(0, horizSlideOut(false))
                 .afterTime(0, moveWrist(0.3))
                 .strafeToLinearHeading(new Vector2d(-53.25, -42.5), Math.toRadians(135))
                 .waitSeconds(0.5)

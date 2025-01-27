@@ -11,9 +11,8 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import org.firstinspires.ftc.teamcode.rrfiles.PinpointDrive;
 
 
-
 @Autonomous (preselectTeleOp = "atlantisTele")
-public class fourSpeciWorking extends atlantisAutoEssentials {
+public class threeSpeci extends atlantisAutoEssentials {
 
 
     @Override
@@ -30,9 +29,9 @@ public class fourSpeciWorking extends atlantisAutoEssentials {
         //Vars
         double reachOutSlideTiltPos = 0.13;
         //Basket Position XY
-        double dropX = 0, dropY = -28.9, dropAngle = Math.toRadians(270);
+        double dropX = 0, dropY = -28.5, dropAngle = Math.toRadians(270);
 
-        double speciIncrement = 1.75; //How far from last speci to drop
+        double speciIncrement = 2; //How far from last speci to drop
 
         Vector2d dropVector = new Vector2d(dropX, dropY);
         Pose2d dropPose = new Pose2d(dropX, dropY, dropAngle);
@@ -48,7 +47,7 @@ public class fourSpeciWorking extends atlantisAutoEssentials {
                 .afterTime(0, moveSlideSpeci())
                 .strafeToLinearHeading(dropVector, dropAngle)
                 .stopAndAdd(placeSpecimen())
-                .waitSeconds(0.25)
+                .waitSeconds(0.5)
                 .stopAndAdd(openDeposit())
                 .build();
 
@@ -73,9 +72,10 @@ public class fourSpeciWorking extends atlantisAutoEssentials {
         Action hang2 = drive.actionBuilder(pickupPose)
                 .afterTime(0, moveSlideSpeci())
 
-                .strafeToLinearHeading(new Vector2d(dropX - 3, dropY), dropAngle)
+                .strafeToLinearHeading(new Vector2d(dropX, dropY - 5), dropAngle)
+                .strafeToConstantHeading(new Vector2d(dropX - 3, dropY))
                 .stopAndAdd(placeSpecimen())
-                .waitSeconds(0.25)
+                .waitSeconds(0.5)
                 .stopAndAdd(openDeposit())
                 .build();
 
@@ -91,27 +91,10 @@ public class fourSpeciWorking extends atlantisAutoEssentials {
 
         Action hang3 = drive.actionBuilder(pickupPose)
                 .afterTime(0, moveSlideSpeci())
-                .strafeToLinearHeading(new Vector2d(dropX + speciIncrement, dropY), dropAngle)
+                .strafeToLinearHeading(new Vector2d(dropX, dropY - 5), dropAngle)
+                .strafeToConstantHeading(new Vector2d(dropX + speciIncrement, dropY))
                 .stopAndAdd(placeSpecimen())
-                .waitSeconds(0.25)
-                .stopAndAdd(openDeposit())
-                .build();
-
-        Action pickup3 = drive.actionBuilder(new Pose2d(dropX + speciIncrement, dropY, dropAngle))
-                .afterTime(0, moveSlideSpeciPickup())
-                .afterTime(1, depositTransferAction(depositTransferOut))
-                .strafeToLinearHeading(new Vector2d(36, -53), Math.toRadians(90))
-                .strafeTo(pickupVector)
-                .waitSeconds(0.25)
-                .stopAndAdd(closeDeposit())
-                .waitSeconds(0.25)
-                .build();
-
-        Action hang4 = drive.actionBuilder(pickupPose)
-                .afterTime(0, moveSlideSpeci())
-                .strafeToLinearHeading(new Vector2d(dropX + speciIncrement + speciIncrement, dropY), dropAngle)
-                .stopAndAdd(placeSpecimen())
-                .waitSeconds(0.25)
+                .waitSeconds(0.5)
                 .stopAndAdd(openDeposit())
                 .build();
 
@@ -140,8 +123,6 @@ public class fourSpeciWorking extends atlantisAutoEssentials {
                         hang2,
                         pickup2,
                         hang3,
-                        pickup3,
-                        hang4,
                         park
                 )
         );
