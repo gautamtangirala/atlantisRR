@@ -45,7 +45,7 @@ public class atlantisTele extends LinearOpMode {
     int highBasketHeight = 950;
 
 
-    int horizTransferPos = 110;
+    int horizTransferPos = 90;
     int horizOutPos = 1240;
 
     double intakeWristVert = 0.525;
@@ -189,6 +189,7 @@ public class atlantisTele extends LinearOpMode {
 
     private void initServos() {
         intakeClawTilt = hardwareMap.get(Servo.class, "intakeClawTilt");
+        intakeClawTilt.setDirection(Servo.Direction.REVERSE);
         intakeClawWrist = hardwareMap.get(Servo.class, "intakeClawWrist");
         intakeTransfer = hardwareMap.get(Servo.class, "intakeTransfer");
         intakeClawGrabLeft = hardwareMap.get(Servo.class, "iCGL");
@@ -324,7 +325,7 @@ public class atlantisTele extends LinearOpMode {
             case WAIT_CLOSE:
                 if (pickupTimer.milliseconds() > 500) {
                     intakeTransfer.setPosition(intakeTransferOut-0.1);
-                    intakeClawTilt.setPosition(0.05);
+                    intakeClawTilt.setPosition(0);
                     pickupState = PickupState.DONE;
                 }
                 break;
@@ -352,7 +353,7 @@ public class atlantisTele extends LinearOpMode {
 
     // Method to start the transfer process
     public void startTransfer() {
-        transferState = TransferState.START;
+            transferState = TransferState.START;
     }
 
     // Method to handle the transfer state machine
@@ -364,7 +365,7 @@ public class atlantisTele extends LinearOpMode {
 
             case START:
                 intakeTransfer.setPosition(intakeTransferIn);
-                intakeClawTilt.setPosition(1);
+                intakeClawTilt.setPosition(0.8);
                 intakeClawWrist.setPosition(intakeWristVert);
 
                 depositTransfer.setPosition(depositTransferIn);
@@ -374,7 +375,7 @@ public class atlantisTele extends LinearOpMode {
                 vertSlides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 vertSlides.setPower(1);
 
-                horizSlides.setTargetPosition((int)(horizTransferPos* 2.5));
+                horizSlides.setTargetPosition((int)(horizTransferPos* 1.5));
                 horizSlides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 horizSlides.setPower(1);
                 transferTimer.reset();
@@ -382,7 +383,7 @@ public class atlantisTele extends LinearOpMode {
                 break;
 
             case DEP_SLIDES:
-                if(transferTimer.milliseconds() > 700){
+                if(transferTimer.milliseconds() > 700 || !horizSlides.isBusy()){
 
                     horizSlides.setTargetPosition(horizTransferPos);
                     horizSlides.setMode(DcMotor.RunMode.RUN_TO_POSITION);

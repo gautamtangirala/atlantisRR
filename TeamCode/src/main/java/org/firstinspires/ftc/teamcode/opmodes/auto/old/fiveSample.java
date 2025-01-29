@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.opmodes.auto.future;
+package org.firstinspires.ftc.teamcode.opmodes.auto.old;
 
 
 import com.acmerobotics.roadrunner.Action;
@@ -7,11 +7,14 @@ import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.opmodes.auto.atlantisAutoEssentials;
 import org.firstinspires.ftc.teamcode.rrfiles.PinpointDrive;
 
 
+
+@Disabled
 @Autonomous (preselectTeleOp = "atlantisTele")
 public class fiveSample extends atlantisAutoEssentials {
 
