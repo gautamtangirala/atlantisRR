@@ -8,10 +8,11 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
 
 
 @TeleOp(name = "atlantisTele")
-public class atlantisTele extends LinearOpMode {
+public class atlantisTelePID extends LinearOpMode {
     public DcMotorEx horizSlides;
     public DcMotorEx vertSlides;
 
@@ -36,18 +37,18 @@ public class atlantisTele extends LinearOpMode {
     double depositTransferOut = 1;
     double slamSpeciPos = 1;
 
-    double intakeClawClose = 0.45;
+    double intakeClawClose = 0.45;  
     double intakeClawOpen = 0.1;
 
     double intakeTransferOut = 1;
     double intakeTransferIn = 0.4;
 
-    int highRungHeight = 218;
+    int highRungHeight = 525;
     int highBasketHeight = 950;
 
 
-    int horizTransferPos = 90;
-    int horizOutPos = 1240;
+    int horizTransferPos = 34;
+    int horizOutPos = 470;
 
     double intakeWristVert = 0.525;
     double intakeWristHoriz = 0;
@@ -72,6 +73,7 @@ public class atlantisTele extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
+            updatePID();
             // Gamepad 1: Holonomic drive
             holonomicDrive();
 
@@ -168,7 +170,11 @@ public class atlantisTele extends LinearOpMode {
 
     private void initMotors() {
         horizSlides = hardwareMap.get(DcMotorEx.class, "horizSlide");
+        horizSlides.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        horizSetPoint = horizSlides.getCurrentPosition();
         vertSlides = hardwareMap.get(DcMotorEx.class, "vertSlide");
+        vertSlides.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        vertSetPoint = vertSlides.getCurrentPosition();
 
         LF = hardwareMap.get(DcMotorEx.class, "leftFront");
         LB = hardwareMap.get(DcMotorEx.class, "leftRear");
@@ -202,6 +208,9 @@ public class atlantisTele extends LinearOpMode {
         depositClawGrabRight = hardwareMap.get(Servo.class, "dCGR");
         depositClawGrabLeft.setDirection(Servo.Direction.REVERSE);
     }
+
+
+
 
     public void holonomicDrive() {
         double vertical = -gamepad1.right_stick_y * slowedDownMulti;
@@ -247,11 +256,7 @@ public class atlantisTele extends LinearOpMode {
                 depositTransfer.setPosition(depositTransferIn);
                 intakeTransfer.setPosition(0.75);
                 intakeClawTilt.setPosition(0.05);
-                horizSlides.setTargetPosition(horizOutPos
-
-                );
-                horizSlides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                horizSlides.setPower(1);
+                horizSetPoint = horizOutPos;
                 slidesTimer.reset(); // Reset the timer for non-blocking delay
                 slidesState = HorizontalSlidesState.WAIT_SLIDE;
                 break;
@@ -277,9 +282,7 @@ public class atlantisTele extends LinearOpMode {
         intakeTransfer.setPosition(0.75);
         intakeClawTilt.setPosition(0.05);
         intakeClawWrist.setPosition(intakeWristVert);
-        horizSlides.setTargetPosition(0);
-        horizSlides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        horizSlides.setPower(1);
+        horizSetPoint = 0;
     }
 
 
@@ -372,23 +375,17 @@ public class atlantisTele extends LinearOpMode {
                 depositTransfer.setPosition(depositTransferIn);
                 depositClaw(depositClawOpen);
 
-                vertSlides.setTargetPosition(0);
-                vertSlides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                vertSlides.setPower(1);
+               vertSetPoint = 0;
 
-                horizSlides.setTargetPosition((int)(horizTransferPos* 1.5));
-                horizSlides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                horizSlides.setPower(1);
+                horizSetPoint = ((int)(horizTransferPos* 1.5));
                 transferTimer.reset();
                 transferState = TransferState.DEP_SLIDES;
                 break;
 
             case DEP_SLIDES:
-                if(transferTimer.milliseconds() > 700 || !horizSlides.isBusy()){
+                if(transferTimer.milliseconds() > 700){
 
-                    horizSlides.setTargetPosition(horizTransferPos);
-                    horizSlides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    horizSlides.setPower(1);
+                   horizSetPoint = horizTransferPos;
                     transferTimer.reset();
                     transferState = TransferState.WAIT_SLIDES;
                 }
@@ -396,7 +393,7 @@ public class atlantisTele extends LinearOpMode {
 
             case WAIT_SLIDES:
                 // Wait for slides to reach the target position or time out
-                if (!horizSlides.isBusy() || transferTimer.milliseconds() > 550) {
+                if (transferTimer.milliseconds() > 550) {
                     depositClaw(depositClawClose);
                     transferTimer.reset();
                     transferState = TransferState.WAIT_CLOSE_CLAW;
@@ -429,18 +426,8 @@ public class atlantisTele extends LinearOpMode {
 
 
     public void highRung() {
-        if(vertSlides.getCurrentPosition() > 550){
-            depositTransfer.setPosition(0.7);
-        }
-        else{
-            depositTransfer.setPosition(0.5);
-        }
-
         depositClaw(depositClawClose);
-
-        vertSlides.setTargetPosition(highRungHeight);
-        vertSlides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        vertSlides.setPower(1);
+        vertSetPoint = highRungHeight;
     }
 
     public enum HighBasketState {
@@ -465,9 +452,7 @@ public class atlantisTele extends LinearOpMode {
 
             case START:
                 // Start vertical slides movement
-                vertSlides.setTargetPosition(highBasketHeight); // Bucket deposit height
-                vertSlides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                vertSlides.setPower(1);
+                vertSetPoint = highBasketHeight;
                 basketState = HighBasketState.WAIT_FOR_SLIDE;
                 break;
 
@@ -499,6 +484,7 @@ public class atlantisTele extends LinearOpMode {
 
     private SlamState slamState = SlamState.IDLE;
     private ElapsedTime slamTimer = new ElapsedTime();
+    private double offset =  140;
 
     // Method to start the slamSpecimen process
     public void startSlamSpecimen() {
@@ -513,14 +499,15 @@ public class atlantisTele extends LinearOpMode {
                 break;
 
             case START:
-                depositTransfer.setPosition(slamSpeciPos);
+                vertSetPoint = highRungHeight - offset;
                 slamTimer.reset();
                 slamState = SlamState.OPEN_CLAW;
                 break;
 
             case OPEN_CLAW:
-                if (slamTimer.milliseconds() > 500) {
+                if (Math.abs(vertSlides.getCurrentPosition() - offset) > 5) {
                     depositClaw(depositClawOpen);
+                    depositTransfer.setPosition(0.5);
                     slamState = SlamState.DONE;
                 }
                 break;
@@ -535,16 +522,12 @@ public class atlantisTele extends LinearOpMode {
     public void specimenPickup() {
         depositClaw(depositClawOpen);
         depositTransfer.setPosition(0.975);
-        vertSlides.setTargetPosition(50);
-        vertSlides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        vertSlides.setPower(1);
+        vertSetPoint = 50;
     }
 
     public void homePosition() {
         depositTransfer.setPosition(0.5);
-        vertSlides.setTargetPosition(0); // Home position
-        vertSlides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        vertSlides.setPower(1);
+        vertSetPoint = 0;
     }
 
     public void intakeClaw(double pos) {
@@ -558,6 +541,57 @@ public class atlantisTele extends LinearOpMode {
     }
 
 
+    public static double vertP = 0.02;
+    public static double vertI = 0;
+    public static double vertD = 0.0002;
+    public static double vertF = 0.00016;
+    private static final PIDFController vertSlidePIDF = new PIDFController(vertP, vertI, vertD, vertF);
+    public static double vertSetPoint = 0;
+    public static double vertMaxPowerConstant = 1.0;
+    int vertMotorPosition;
+
+
+    public static double horizP = 0.025;
+    public static double horizI = 0;
+    public static double horizD = 0.0002;
+    public static double horizF = 0.0001;
+    private static final PIDFController horizSlidePIDF = new PIDFController(horizP, horizI, horizD, horizF);
+    public static double horizSetPoint = 0;
+    public static double horizMaxPowerConstant = 0.8;
+    int horizMotorPosition;
+
+    public void updatePID(){
+        vertMotorPosition = vertSlides.getCurrentPosition();
+
+        vertSlidePIDF.setP(vertP);
+        vertSlidePIDF.setI(vertI);
+        vertSlidePIDF.setD(vertD);
+        vertSlidePIDF.setF(vertF);
+
+        vertSlidePIDF.setSetPoint(vertSetPoint);
+        vertSlidePIDF.setTolerance(5);
+
+        double vertMaxPower = (vertF * vertMotorPosition) + vertMaxPowerConstant;
+        double vertPower = Range.clip(vertSlidePIDF.calculate(vertMotorPosition, vertSetPoint), (vertSetPoint > 50) ? -1.0 : -0.7, vertMaxPower);
+
+        vertSlides.setPower(vertPower);
+
+
+        horizMotorPosition = horizSlides.getCurrentPosition();
+
+        horizSlidePIDF.setP(horizP);
+        horizSlidePIDF.setI(horizI);
+        horizSlidePIDF.setD(horizD);
+        horizSlidePIDF.setF(horizF);
+
+        horizSlidePIDF.setSetPoint(horizSetPoint);
+        horizSlidePIDF.setTolerance(5);
+
+        double horizMaxPower = (horizF * horizMotorPosition) + horizMaxPowerConstant;
+        double horizPower = Range.clip(horizSlidePIDF.calculate(horizMotorPosition, horizSetPoint), -horizMaxPower, horizMaxPower);
+
+        horizSlides.setPower(horizPower);
+    }
 
 
 

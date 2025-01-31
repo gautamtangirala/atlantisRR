@@ -2,14 +2,17 @@ package org.firstinspires.ftc.teamcode.opmodes.auto;
 
 import androidx.annotation.NonNull;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.InstantAction;
+import com.arcrobotics.ftclib.controller.PIDFController;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.Range;
 
 import org.openftc.easyopencv.OpenCvWebcam;
 
@@ -21,6 +24,7 @@ import org.openftc.easyopencv.OpenCvWebcam;
  * DO NOT MODIFY
  */
 
+@Config
 public class atlantisAutoEssentials extends LinearOpMode {
     public DcMotorEx LF; // LeftFront Motor
     public DcMotorEx LB; // LeftBack Motor
@@ -48,7 +52,7 @@ public class atlantisAutoEssentials extends LinearOpMode {
 
 
     //Variables
-    public  double depositClawClose = 0.45;
+    public double depositClawClose = 0.45;
     public double depositClawOpen = 0.1;
 
     public double depositTransferIn = 0.1725;
@@ -56,30 +60,26 @@ public class atlantisAutoEssentials extends LinearOpMode {
     public double slamSpeciPos = 1;
 
     public double intakeClawClose = 0.45;
-    public  double intakeClawOpen = 0.1;
+    public double intakeClawOpen = 0.1;
 
-    public int horizTransferPos = 110;
-    public int horizOutPos = 1240;
+    public int horizTransferPos = 34;
+    public int horizOutPos = 470;
 
     public double intakeTransferOut = 1;
     public double intakeTransferIn = 0.4;
 
-    public int highRungHeight = 500;
+    public int highRungHeight = 525;
     public int highBasketHeight = 960;
     public int speciPickupHeight = 26;
 
-    public  double intakeWristVert = 0.525;
+    public double intakeWristVert = 0.525;
     public double intakeWristHoriz = 0;
 
     public double turnMulti = 0.6;
-    public  double slowedDownMulti = 0.8;
+    public double slowedDownMulti = 0.8;
 
 
-
-
-
-
-    public void initDrive(){
+    public void initDrive() {
         LF = hardwareMap.get(DcMotorEx.class, "leftFront");
         LF.setDirection(DcMotorSimple.Direction.REVERSE);
         LF.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
@@ -102,18 +102,21 @@ public class atlantisAutoEssentials extends LinearOpMode {
 
     }
 
-    public void initSubsystems(){
+    public void initSubsystems() {
         vertSlides = hardwareMap.get(DcMotorEx.class, "vertSlide");
         vertSlides.setDirection(DcMotorSimple.Direction.REVERSE);
         vertSlides.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         vertSlides.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        vertSlides.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         horizSlides = hardwareMap.get(DcMotorEx.class, "horizSlide");
         horizSlides.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         horizSlides.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        horizSlides.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
 
         intakeClawTilt = hardwareMap.get(Servo.class, "intakeClawTilt");
+        intakeClawTilt.setDirection(Servo.Direction.REVERSE);
         intakeClawWrist = hardwareMap.get(Servo.class, "intakeClawWrist");
         intakeTransfer = hardwareMap.get(Servo.class, "intakeTransfer");
         intakeClawGrabLeft = hardwareMap.get(Servo.class, "iCGL");
@@ -128,88 +131,70 @@ public class atlantisAutoEssentials extends LinearOpMode {
     }
 
 
-
-
-
-
-
-
-
-
-
-
-    public void intakeGrab(double pos){
+    public void intakeGrab(double pos) {
         intakeClawGrabLeft.setPosition(pos);
         intakeClawGrabRight.setPosition(pos);
     }
 
-    public void depositGrab(double pos){
+    public void depositGrab(double pos) {
         depositClawGrabRight.setPosition(pos);
         depositClawGrabLeft.setPosition(pos);
     }
 
     public Action openDeposit() {
-        return new InstantAction(() -> { depositGrab(depositClawOpen); });
+        return new InstantAction(() -> {
+            depositGrab(depositClawOpen);
+        });
     }
 
 
     public Action closeDeposit() {
-        return new InstantAction(() -> { depositGrab(depositClawClose); });
+        return new InstantAction(() -> {
+            depositGrab(depositClawClose);
+        });
     }
 
     public Action openIntake() {
-        return new InstantAction(() -> { intakeGrab(intakeClawOpen); });
+        return new InstantAction(() -> {
+            intakeGrab(intakeClawOpen);
+        });
     }
 
     public Action closeIntake() {
-        return new InstantAction(() -> { intakeGrab(intakeClawClose); });
+        return new InstantAction(() -> {
+            intakeGrab(intakeClawClose);
+        });
     }
 
 
     public Action depositTransferAction(double pos) {
-        return new InstantAction(() -> { depositTransfer.setPosition(pos); });
+        return new InstantAction(() -> {
+            depositTransfer.setPosition(pos);
+        });
     }
 
     public Action intakeTransferAction(double pos) {
-        return new InstantAction(() -> { intakeTransfer.setPosition(pos); });
+        return new InstantAction(() -> {
+            intakeTransfer.setPosition(pos);
+        });
     }
 
 
-
-    public Action placeSpecimen(){
+    public Action placeSpecimen() {
         return new InstantAction(() -> {
-        depositTransfer.setPosition(slamSpeciPos);}
+            depositTransfer.setPosition(slamSpeciPos);
+        }
         );
     }
 
-    public void setupTransfer(){
-
-        closeIntake();
-        openDeposit();
-        intakeTransfer.setPosition(0.5);
-        intakeClawTilt.setPosition(1);
-        depositTransfer.setPosition(0);
-    }
-
-
-
-
-    public void transferToDep(){
-        closeDeposit();
-        openIntake();
-        intakeTransfer.setPosition(0.3);
-        depositTransfer.setPosition(0.5);
-    }
 
     public Action moveSlideHighBasket() {
         return new Action() {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
-                vertSlides.setTargetPosition(highBasketHeight);
-                vertSlides.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-                vertSlides.setPower(1);
+                vertSetPoint = highBasketHeight;
 
-                return vertSlides.getCurrentPosition() < highBasketHeight - 10;
+                return Math.abs(vertSlides.getCurrentPosition() - highBasketHeight) > 5;
             }
         };
     }
@@ -219,9 +204,7 @@ public class atlantisAutoEssentials extends LinearOpMode {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 depositTransfer.setPosition(depositTransferOut);
-                vertSlides.setTargetPosition(highRungHeight);
-                vertSlides.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-                vertSlides.setPower(1);
+                vertSetPoint = highRungHeight;
 
                 return Math.abs(vertSlides.getCurrentPosition() - highRungHeight) > 5;
             }
@@ -232,13 +215,12 @@ public class atlantisAutoEssentials extends LinearOpMode {
     public Action placeSpecimenSlides() {
         return new Action() {
 
-            int offset = highRungHeight - 120;
+            int offset = highRungHeight - 142;
+
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 depositTransfer.setPosition(depositTransferOut);
-                vertSlides.setTargetPosition(offset);
-                vertSlides.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-                vertSlides.setPower(1);
+                vertSetPoint = offset;
 
                 return Math.abs(vertSlides.getCurrentPosition() - offset) > 5;
             }
@@ -246,49 +228,41 @@ public class atlantisAutoEssentials extends LinearOpMode {
     }
 
 
-    public Action moveSlideTop(){
+    public Action moveSlideTop() {
         return new InstantAction(() -> {
             vertSlides.setTargetPosition(highBasketHeight);
-        vertSlides.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-        vertSlides.setPower(1);  });
+            vertSlides.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+            vertSlides.setPower(1);
+        });
     }
 
-    public Action moveSlideSpeci(){
+    public Action moveSlideSpeci() {
         return new InstantAction(() -> {
             depositTransfer.setPosition(0.5);
             vertSlides.setTargetPosition(highRungHeight);
             vertSlides.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-            vertSlides.setPower(1);  });
+            vertSlides.setPower(1);
+        });
     }
 
 
-    public Action moveSlideBottom(){
+    public Action moveSlideBottom() {
         return new InstantAction(() -> {
-            depositTransfer.setPosition(0.5);
-            vertSlides.setTargetPosition(5);
-            vertSlides.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-            vertSlides.setPower(1); });
+            vertSetPoint = 0;
+        });
     }
 
-    public Action moveSlideSpeciPickup(){
+    public Action moveSlideSpeciPickup() {
         return new InstantAction(() -> {
-            depositTransfer.setPosition(0.5);
-            vertSlides.setTargetPosition(speciPickupHeight);
-            vertSlides.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-            vertSlides.setPower(1); });
+            vertSetPoint = speciPickupHeight;
+        });
     }
 
-    public Action moveSlidePark(){
+    public Action moveSlidePark() {
         return new InstantAction(() -> {
-            depositTransfer.setPosition(0.5);
-            vertSlides.setTargetPosition(151);
-            vertSlides.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
-            vertSlides.setPower(1); });
+            vertSetPoint = 151;
+        });
     }
-
-
-
-
 
 
     public Action horizSlideOut(boolean sub) {
@@ -298,27 +272,22 @@ public class atlantisAutoEssentials extends LinearOpMode {
                 openIntake();
                 intakeTransfer.setPosition(sub ? 0.75 : 0.9);
                 intakeClawTilt.setPosition(0.05);
-                horizSlides.setTargetPosition(horizOutPos);
-                horizSlides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                horizSlides.setPower(1);
+                horizSetPoint = horizOutPos;
 
-                return Math.abs(horizSlides.getCurrentPosition() - horizOutPos) > 10 ;
+                return Math.abs(horizSlides.getCurrentPosition() - horizOutPos) > 10;
             }
         };
     }
 
 
-
-
-
-    public Action moveWrist(double pos){
-        return new InstantAction(() ->{
+    public Action moveWrist(double pos) {
+        return new InstantAction(() -> {
             intakeClawWrist.setPosition(pos);
         });
     }
 
 
-    public Action clawPickup(){
+    public Action clawPickup() {
 
 
         return new InstantAction(() -> {
@@ -333,78 +302,71 @@ public class atlantisAutoEssentials extends LinearOpMode {
     }
 
 
-    public Action transferSensed(int state){
+    public Action transferSensed(int state) {
 
-        if(state == 1) {
+        if (state == 1) {
             return new Action() {
                 @Override
                 public boolean run(@NonNull TelemetryPacket packet) {
                     intakeTransfer.setPosition(intakeTransferIn);
-                    intakeClawTilt.setPosition(1);
+                    intakeClawTilt.setPosition(0.85);
                     intakeClawWrist.setPosition(intakeWristVert);
 
                     depositTransfer.setPosition(depositTransferIn);
                     openDeposit();
 
-                    vertSlides.setTargetPosition(0);
-                    vertSlides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    vertSlides.setPower(1);
+                    vertSetPoint = 0;
 
-                    horizSlides.setTargetPosition((int)(horizTransferPos * 2.5));
-                    horizSlides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    horizSlides.setPower(1);
+                    horizSetPoint = ((int) (horizTransferPos * 2.5));
                     return Math.abs(horizSlides.getCurrentPosition() - horizTransferPos * 2.5) > 5;
                 }
             };
-        }
-        else if (state == 2){
+        } else if (state == 2) {
             return new Action() {
                 @Override
                 public boolean run(@NonNull TelemetryPacket packet) {
-                    horizSlides.setTargetPosition(horizTransferPos);
-                    horizSlides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    horizSlides.setPower(1);
-                    return Math.abs(horizSlides.getCurrentPosition() - horizTransferPos) > 5 ;
+                    horizSetPoint = horizTransferPos;
+                    return Math.abs(horizSlides.getCurrentPosition() - horizTransferPos) > 5;
                 }
             };
-        }
-        else {
+        } else {
             return null;
         }
     }
 
-    public Action transfer(int state){
-        if (state == 1){
-            return new InstantAction(() ->{
+    public Action transfer(int state) {
+        if (state == 1) {
+            return new InstantAction(() -> {
                 intakeTransfer.setPosition(intakeTransferIn);
-                intakeClawTilt.setPosition(1);
+                intakeClawTilt.setPosition(0.8);
                 intakeClawWrist.setPosition(intakeWristVert);
 
                 depositTransfer.setPosition(depositTransferIn);
                 openDeposit();
 
-                vertSlides.setTargetPosition(0);
-                vertSlides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                vertSlides.setPower(1);
+                vertSetPoint = 0;
 
-                horizSlides.setTargetPosition((int)(horizTransferPos * 2.5));
-                horizSlides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                horizSlides.setPower(1);
+
+
+                horizSetPoint = horizTransferPos;
+
             });
         } else if (state == 2) {
-            return new InstantAction(() ->{
-                horizSlides.setTargetPosition(horizTransferPos);
-                horizSlides.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                horizSlides.setPower(1);
+            return new InstantAction(() -> {
+                horizSetPoint = horizTransferPos;
             });
         } else if (state == 3) {
             return new InstantAction(() -> {
-            depositTransfer.setPosition(0.5);
-            intakeTransfer.setPosition(intakeTransferIn+0.1);});
+                depositTransfer.setPosition(0.5);
+                intakeTransfer.setPosition(intakeTransferIn + 0.1);
+            });
         } else {
             return null;
         }
     }
+
+
+
 
 
 /*
@@ -441,7 +403,65 @@ public class atlantisAutoEssentials extends LinearOpMode {
 */
 
 
+    public static double vertP = 0.02;
+    public static double vertI = 0;
+    public static double vertD = 0.0002;
+    public static double vertF = 0.00016;
+    private static final PIDFController vertSlidePIDF = new PIDFController(vertP, vertI, vertD, vertF);
+    public static double vertSetPoint = 0;
+    public static double vertMaxPowerConstant = 1.0;
+    int vertMotorPosition;
 
+
+    public static double horizP = 0.025;
+    public static double horizI = 0;
+    public static double horizD = 0.0002;
+    public static double horizF = 0.0001;
+    private static final PIDFController horizSlidePIDF = new PIDFController(horizP, horizI, horizD, horizF);
+    public static double horizSetPoint = 0;
+    public static double horizMaxPowerConstant = 0.8;
+    int horizMotorPosition;
+
+    // Run in parallel w auto
+    public Action updatePidAction() {
+        return new Action() {
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                vertMotorPosition = vertSlides.getCurrentPosition();
+
+                vertSlidePIDF.setP(vertP);
+                vertSlidePIDF.setI(vertI);
+                vertSlidePIDF.setD(vertD);
+                vertSlidePIDF.setF(vertF);
+
+                vertSlidePIDF.setSetPoint(vertSetPoint);
+                vertSlidePIDF.setTolerance(5);
+
+                double vertMaxPower = (vertF * vertMotorPosition) + vertMaxPowerConstant;
+                double vertPower = Range.clip(vertSlidePIDF.calculate(vertMotorPosition, vertSetPoint), (vertSetPoint > 50) ? -1.0 : -0.7, vertMaxPower);
+
+                vertSlides.setPower(vertPower);
+
+
+                horizMotorPosition = horizSlides.getCurrentPosition();
+
+                horizSlidePIDF.setP(horizP);
+                horizSlidePIDF.setI(horizI);
+                horizSlidePIDF.setD(horizD);
+                horizSlidePIDF.setF(horizF);
+
+                horizSlidePIDF.setSetPoint(horizSetPoint);
+                horizSlidePIDF.setTolerance(5);
+
+                double horizMaxPower = (horizF * horizMotorPosition) + horizMaxPowerConstant;
+                double horizPower = Range.clip(horizSlidePIDF.calculate(horizMotorPosition, horizSetPoint), -horizMaxPower, horizMaxPower);
+
+                horizSlides.setPower(horizPower);
+
+                return true;
+            }
+        };
+    }
 
     @Override
     public void runOpMode(){

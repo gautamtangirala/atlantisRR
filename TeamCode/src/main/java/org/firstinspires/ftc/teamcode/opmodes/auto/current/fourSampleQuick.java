@@ -14,7 +14,7 @@ import org.firstinspires.ftc.teamcode.opmodes.auto.atlantisAutoEssentials;
 import org.firstinspires.ftc.teamcode.rrfiles.PinpointDrive;
 
 
-@Autonomous (preselectTeleOp = "atlantisTele")
+@Autonomous (name = "Four Sample", preselectTeleOp = "atlantisTele")
 public class fourSampleQuick extends atlantisAutoEssentials {
 
 
@@ -118,16 +118,16 @@ public class fourSampleQuick extends atlantisAutoEssentials {
 
 
         Actions.runBlocking(
+                new ParallelAction( updatePidAction(),
                 new SequentialAction(
                         dropPreload,
                         block2,
                         block3,
                         block4,
                         end
-                )
+                ))
         );
 
     }
-
 
 }
