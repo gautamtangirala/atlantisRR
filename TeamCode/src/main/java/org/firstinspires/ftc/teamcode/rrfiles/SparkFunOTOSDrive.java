@@ -28,17 +28,17 @@ public class SparkFunOTOSDrive extends MecanumDrive {
     public static class Params {
         // Assuming you've mounted your sensor to a robot and it's not centered,
         // you can specify the offset for the sensor relative to the center of the
-        // robot. The units default to inches and degrees, but if you want to use
+        // robot. The units default to inchesToBlock and degrees, but if you want to use
         // different units, specify them before setting the offset! Note that as of
         // firmware version 1.0, these values will be lost after a power cycle, so
         // you will need to set them each time you power up the sensor. For example, if
-        // the sensor is mounted 5 inches to the left (negative X) and 10 inches
+        // the sensor is mounted 5 inchesToBlock to the left (negative X) and 10 inchesToBlock
         // forward (positive Y) of the center of the robot, and mounted 90 degrees
         // clockwise (negative rotation) from the robot's orientation, the offset
         // would be {-5, 10, -90}. These can be any value, even the angle can be
         // tweaked slightly to compensate for imperfect mounting (eg. 1.3 degrees).
 
-        // RR localizer note: These units are inches and radians.
+        // RR localizer note: These units are inchesToBlock and radians.
         public SparkFunOTOS.Pose2D offset = new SparkFunOTOS.Pose2D(0, 0, Math.toRadians(0));
 
         // Here we can set the linear and angular scalars, which can compensate for
@@ -55,8 +55,8 @@ public class SparkFunOTOSDrive extends MecanumDrive {
         // would be 3600/3585 = 1.004. To calibrate the linear scalar, move the
         // robot a known distance and measure the error; do this multiple times at
         // multiple speeds to get an average, then set the linear scalar to the
-        // inverse of the error. For example, if you move the robot 100 inches and
-        // the sensor reports 103 inches, set the linear scalar to 100/103 = 0.971
+        // inverse of the error. For example, if you move the robot 100 inchesToBlock and
+        // the sensor reports 103 inchesToBlock, set the linear scalar to 100/103 = 0.971
         public double linearScalar = 1.0;
         public double angularScalar = 1.0;
     }

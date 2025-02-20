@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.opmodes.teleop;
 
 import com.arcrobotics.ftclib.controller.PIDFController;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -10,7 +11,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 
-@TeleOp(name = "atlantisTele")
+@Disabled
+@TeleOp(name = "atlantisTeleOld")
 public class atlantisTele extends LinearOpMode {
     public DcMotorEx horizSlides;
     public DcMotorEx vertSlides;
@@ -52,7 +54,7 @@ public class atlantisTele extends LinearOpMode {
     double intakeWristVert = 0.525;
     double intakeWristHoriz = 0;
 
-    double turnMulti = 0.6;
+    double turnMulti = 1;
     double slowedDownMulti = 0.8;
 
     boolean specimenMode = true;

@@ -6,6 +6,7 @@ import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.SleepAction;
+import com.acmerobotics.roadrunner.TranslationalVelConstraint;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -34,7 +35,7 @@ public class fourSpeciSlides extends atlantisAutoEssentials {
         //Basket Position XY
         double dropX = 0, dropY = -32.75, dropAngle = Math.toRadians(270);
 
-        double speciIncrement = 1.75; //How far from last speci to drop
+        double speciIncrement = 2.1; //How far from last speci to drop
 
         Vector2d dropVector = new Vector2d(dropX, dropY);
         Pose2d dropPose = new Pose2d(dropX, dropY, dropAngle);
@@ -54,14 +55,14 @@ public class fourSpeciSlides extends atlantisAutoEssentials {
 
         Action push2BlocksPickup1 = drive.actionBuilder(dropPose)
                 .afterTime(0, moveSlideSpeciPickup())
-                .splineToLinearHeading(new Pose2d(35, -30, Math.toRadians(90)), Math.toRadians(90))
+                .splineToLinearHeading(new Pose2d(35, -30, Math.toRadians(90)), Math.toRadians(90), new TranslationalVelConstraint(70.0))
                 .splineToConstantHeading(new Vector2d(46, -12.5), Math.toRadians(270))
                 .strafeToConstantHeading(new Vector2d(46, -48))
                 .strafeToConstantHeading(new Vector2d(48, -15))
                 .splineToConstantHeading(new Vector2d(58, -15), Math.toRadians(270))
-                .splineToConstantHeading(new Vector2d(59, -35), Math.toRadians(270))
+                .splineToConstantHeading(new Vector2d(58, -50), Math.toRadians(270))
                 .afterTime(0, depositTransferAction(depositTransferOut))
-                .splineToConstantHeading(new Vector2d(38, -45), Math.toRadians(270))
+                .strafeToConstantHeading(new Vector2d(38, -50))
                 .waitSeconds(0.25)
                 .strafeToConstantHeading(new Vector2d(pickupX, pickupY+0.5))
                 .waitSeconds(0.25)
@@ -74,7 +75,7 @@ public class fourSpeciSlides extends atlantisAutoEssentials {
         Action hang2 = drive.actionBuilder(pickupPose)
 
                 .afterTime(0, moveSlideHighRung())
-                .strafeToLinearHeading(new Vector2d(dropX - 3 , dropY-6), dropAngle)
+                .strafeToLinearHeading(new Vector2d(dropX - 3 , dropY-6), dropAngle, new TranslationalVelConstraint(70.0))
                 .strafeToLinearHeading(new Vector2d(dropX - 3, dropY), dropAngle)
                 .stopAndAdd(new SequentialAction(placeSpecimenSlides(),new SleepAction(0.05),openDeposit(), depositTransferAction(0.5)))
                 .build();
@@ -91,7 +92,7 @@ public class fourSpeciSlides extends atlantisAutoEssentials {
 
         Action hang3 = drive.actionBuilder(pickupPose)
                 .afterTime(0, moveSlideHighRung())
-                .strafeToLinearHeading(new Vector2d(dropX  + speciIncrement, dropY-6), dropAngle)
+                .strafeToLinearHeading(new Vector2d(dropX  + speciIncrement, dropY-6), dropAngle, new TranslationalVelConstraint(70.0))
                 .strafeToLinearHeading(new Vector2d(dropX + speciIncrement, dropY), dropAngle)
                 .stopAndAdd(new SequentialAction(placeSpecimenSlides(),new SleepAction(0.05),openDeposit(), depositTransferAction(0.5)))
                 .build();
@@ -108,7 +109,7 @@ public class fourSpeciSlides extends atlantisAutoEssentials {
 
         Action hang4 = drive.actionBuilder(pickupPose)
                 .afterTime(0, moveSlideHighRung())
-                .strafeToLinearHeading(new Vector2d(dropX + speciIncrement*3, dropY-6), dropAngle)
+                .strafeToLinearHeading(new Vector2d(dropX + speciIncrement*3, dropY-6), dropAngle, new TranslationalVelConstraint(70.0))
                 .strafeToLinearHeading(new Vector2d(dropX + speciIncrement*3, dropY), dropAngle)
                 .stopAndAdd(new SequentialAction(placeSpecimenSlides(),new SleepAction(0.05),openDeposit(), depositTransferAction(0.5)))
                 .build();
@@ -116,12 +117,13 @@ public class fourSpeciSlides extends atlantisAutoEssentials {
 
         Action park = drive.actionBuilder((new Pose2d(dropX + speciIncrement + speciIncrement, dropY, dropAngle)))
                 .afterTime(0, moveSlideBottom())
-                .strafeToConstantHeading(new Vector2d(pickupX + 10, pickupY + 3))
+                .strafeToLinearHeading(new Vector2d(25, -45), Math.toRadians(315), new TranslationalVelConstraint(80))
                 .build();
 
         depositGrab(depositClawClose);
         depositTransfer.setPosition(0.5);
         intakeTransfer.setPosition(intakeTransferIn);
+        intakeClawTilt.setPosition(0.85);
 
         telemetry.addLine("4 SPECIMEN AUTO: 80 POINTS");
         telemetry.addLine("ALIGN ROBOT SIDE WITH MIDDLE TILE");

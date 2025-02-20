@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.opmodes.teleop;
 
 import com.arcrobotics.ftclib.controller.PIDFController;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -11,8 +12,9 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 
-@TeleOp(name = "atlantisTele")
-public class atlantisTelePID extends LinearOpMode {
+@Disabled
+@TeleOp(name = "solo teleop")
+public class atlantisTeleSolo extends LinearOpMode {
     public DcMotorEx horizSlides;
     public DcMotorEx vertSlides;
 
@@ -40,10 +42,8 @@ public class atlantisTelePID extends LinearOpMode {
     double intakeClawClose = 0.45;  
     double intakeClawOpen = 0.1;
 
-
-
     double intakeTransferOut = 1;
-    double intakeTransferIn = 0.45;
+    double intakeTransferIn = 0.4;
 
     int highRungHeight = 525;
     int highBasketHeight = 970;
@@ -84,56 +84,56 @@ public class atlantisTelePID extends LinearOpMode {
 
             if (specimenMode) {
                 // Specimen Mode Controls
-                if (gamepad2.dpad_up) {
+                if (gamepad1.dpad_up) {
                     highRung();
-                } else if (gamepad2.dpad_right) {
+                } else if (gamepad1.dpad_right) {
                     if (slamState == SlamState.IDLE) {
                         startSlamSpecimen();
                     }
-                } else if (gamepad2.dpad_left) {
+                } else if (gamepad1.dpad_left) {
                     specimenPickup();
-                } else if (gamepad2.dpad_down) {
+                } else if (gamepad1.dpad_down) {
                     homePosition();
-                } else if (gamepad2.left_bumper) {
+                } else if (gamepad1.left_bumper) {
                     startHorizontalSlidesOut();
-                } else if (gamepad2.right_bumper) {
+                } else if (gamepad1.right_bumper) {
                     horizontalSlidesIn();
                 }
 
                 // Common Controls
-                if (gamepad2.b) {
+                if (gamepad1.b) {
                     depositClaw(depositClawOpen);
-                } else if (gamepad2.x) {
+                } else if (gamepad1.x) {
                     depositClaw(depositClawClose);
-                } else if (gamepad2.a && pickupState == PickupState.IDLE ) {
+                } else if (gamepad1.a && pickupState == PickupState.IDLE ) {
                     startPickupSample();
-                } else if (gamepad2.y) {
+                } else if (gamepad1.y) {
                     startTransfer();
                 }
             } else if (sampleMode) {
                 // Sample Mode Controls
-                if (gamepad2.dpad_up && transferState == TransferState.IDLE) {
+                if (gamepad1.dpad_up && transferState == TransferState.IDLE) {
                     startHighBasket();
-                } else if (gamepad2.right_bumper && transferState == TransferState.IDLE && pickupState == PickupState.IDLE) {
+                } else if (gamepad1.right_bumper && transferState == TransferState.IDLE && pickupState == PickupState.IDLE) {
                     startTransfer();
-                } else if (gamepad2.dpad_down) {
+                } else if (gamepad1.dpad_down) {
                     homePosition();
-                } else if (gamepad2.left_bumper) {
+                } else if (gamepad1.left_bumper) {
                     startHorizontalSlidesOut();
-                } else if (gamepad2.dpad_right) {
+                } else if (gamepad1.dpad_right) {
                     horizontalSlidesIn();
-                } else if(gamepad2.dpad_left){
+                } else if(gamepad1.dpad_left){
 
                 }
 
                 // Common Controls
-                if (gamepad2.b) {
+                if (gamepad1.b) {
                     depositClaw(depositClawOpen);
-                } else if (gamepad2.x) {
+                } else if (gamepad1.x) {
                     depositClaw(depositClawClose);
-                } else if (gamepad2.a && pickupState == PickupState.IDLE && transferState == TransferState.IDLE) {
+                } else if (gamepad1.a && pickupState == PickupState.IDLE && transferState == TransferState.IDLE) {
                     startPickupSample();
-                } else if (gamepad2.y) {
+                } else if (gamepad1.y) {
                     intakeClaw(intakeClawOpen);
                 }
             }
@@ -147,9 +147,9 @@ public class atlantisTelePID extends LinearOpMode {
                 sampleMode = false;
             }
 
-            if (gamepad1.left_bumper) {
+            if (gamepad1.left_trigger != 0) {
                 intakeClawWrist.setPosition(intakeWristHoriz);
-            } else if (gamepad1.right_bumper) {
+            } else {
                 intakeClawWrist.setPosition(intakeWristVert);
             }
 
@@ -323,13 +323,13 @@ public class atlantisTelePID extends LinearOpMode {
             case START:
                 intakeClaw(intakeClawOpen);
                 intakeTransfer.setPosition(intakeTransferOut);
-                intakeClawTilt.setPosition(0.1);
+                intakeClawTilt.setPosition(0.075);
                 pickupTimer.reset();
                 pickupState = PickupState.WAIT_OPEN;
                 break;
 
             case WAIT_OPEN:
-                if (pickupTimer.milliseconds() > 300) {
+                if (pickupTimer.milliseconds() > 500) {
                     intakeClaw(intakeClawClose);
                     pickupTimer.reset();
                     pickupState = PickupState.WAIT_CLOSE;
@@ -379,7 +379,7 @@ public class atlantisTelePID extends LinearOpMode {
 
             case START:
                 intakeTransfer.setPosition(intakeTransferIn);
-                intakeClawTilt.setPosition(0.85);
+                intakeClawTilt.setPosition(0.8);
                 intakeClawWrist.setPosition(intakeWristVert);
 
                 depositTransfer.setPosition(depositTransferIn);
@@ -536,7 +536,7 @@ public class atlantisTelePID extends LinearOpMode {
     }
 
     public void specimenPickup() {
-        intakeClawTilt.setPosition(0.85);
+        intakeClawTilt.setPosition(0.8);
         intakeTransfer.setPosition(intakeTransferIn);
         depositClaw(depositClawOpen);
         depositTransfer.setPosition(0.975);
@@ -545,7 +545,7 @@ public class atlantisTelePID extends LinearOpMode {
 
     public void homePosition() {
         depositTransfer.setPosition(0.5);
-        intakeClawTilt.setPosition(0.85);
+        intakeClawTilt.setPosition(0.8);
         intakeTransfer.setPosition(intakeTransferIn);
         vertSetPoint = 0;
         horizSetPoint = 0;

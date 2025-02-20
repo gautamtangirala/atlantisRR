@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.opmodes.auto;
 
+import static java.lang.Math.round;
+
 import androidx.annotation.NonNull;
 
 import com.acmerobotics.dashboard.config.Config;
@@ -7,6 +9,9 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.InstantAction;
 import com.arcrobotics.ftclib.controller.PIDFController;
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -15,6 +20,8 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
 
 import org.openftc.easyopencv.OpenCvWebcam;
+
+import java.util.List;
 
 /*
  * This is meant to be a library!
@@ -40,6 +47,10 @@ public class atlantisAutoEssentials extends LinearOpMode {
     public Servo intakeClawTilt;
     public Servo intakeTransfer;
     public Servo intakeClawWrist;
+
+    public Limelight3A limelight;
+    public LLResult result;
+    List<LLResultTypes.ColorResult> colorResults;
 
     public Servo depositTransfer;
     public Servo depositClawGrabRight;
@@ -69,7 +80,7 @@ public class atlantisAutoEssentials extends LinearOpMode {
     public double intakeTransferIn = 0.4;
 
     public int highRungHeight = 525;
-    public int highBasketHeight = 960;
+    public int highBasketHeight = 950;
     public int speciPickupHeight = 26;
 
     public double intakeWristVert = 0.525;
@@ -100,6 +111,10 @@ public class atlantisAutoEssentials extends LinearOpMode {
         RB.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         ((DcMotorEx) RB).setTargetPositionTolerance(tickAcceptance);
 
+    }
+
+    public void initLimelight(){
+        limelight = hardwareMap.get(Limelight3A.class, "limelight");
     }
 
     public void initSubsystems() {
@@ -189,12 +204,16 @@ public class atlantisAutoEssentials extends LinearOpMode {
 
 
     public Action moveSlideHighBasket() {
+
         return new Action() {
+
+
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 vertSetPoint = highBasketHeight;
 
-                return Math.abs(vertSlides.getCurrentPosition() - highBasketHeight) > 5;
+
+                return Math.abs(vertSlides.getCurrentPosition() - highBasketHeight) > 10;
             }
         };
     }
@@ -260,7 +279,7 @@ public class atlantisAutoEssentials extends LinearOpMode {
 
     public Action moveSlidePark() {
         return new InstantAction(() -> {
-            vertSetPoint = 151;
+            vertSetPoint = 190;
         });
     }
 
@@ -275,6 +294,20 @@ public class atlantisAutoEssentials extends LinearOpMode {
                 horizSetPoint = horizOutPos;
 
                 return Math.abs(horizSlides.getCurrentPosition() - horizOutPos) > 10;
+            }
+        };
+    }
+
+    public Action horizSlideOut(boolean sub, int pos) {
+        return new Action() {
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                openIntake();
+                intakeTransfer.setPosition(sub ? 0.75 : 0.9);
+                intakeClawTilt.setPosition(0.05);
+                horizSetPoint = pos;
+
+                return Math.abs(horizSlides.getCurrentPosition() - pos) > 10;
             }
         };
     }
@@ -295,7 +328,7 @@ public class atlantisAutoEssentials extends LinearOpMode {
             depositTransfer.setPosition(depositTransferIn);
             openDeposit();
             intakeTransfer.setPosition(intakeTransferOut);
-            intakeClawTilt.setPosition(0.075);
+            intakeClawTilt.setPosition(0.1);
         });
 
 
@@ -338,7 +371,7 @@ public class atlantisAutoEssentials extends LinearOpMode {
         if (state == 1) {
             return new InstantAction(() -> {
                 intakeTransfer.setPosition(intakeTransferIn);
-                intakeClawTilt.setPosition(0.8);
+                intakeClawTilt.setPosition(0.85);
                 intakeClawWrist.setPosition(intakeWristVert);
 
                 depositTransfer.setPosition(depositTransferIn);
@@ -369,44 +402,11 @@ public class atlantisAutoEssentials extends LinearOpMode {
 
 
 
-/*
-    public void runCamera(){
-        final String webcamName = "Webcam 1";
-        final int length = 320;
-        final int width = 240;
-        final int squareSize = 30;
 
-        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, webcamName), cameraMonitorViewId);
-
-        detector = new PPR1SleeveDetector(telemetry, length, width, squareSize, 30, -56);
-        webcam.setPipeline(detector);
-
-        webcam.setMillisecondsPermissionTimeout(2500); // Timeout for obtaining permission is configurable. Set before opening.
-        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
-        {
-            @Override
-            public void onOpened()
-            {
-                webcam.startStreaming(length, width, OpenCvCameraRotation.UPRIGHT);
-            }
-
-            @Override
-            public void onError(int errorCode)
-            {
-
-            }
-        });
-
-    }
-    public void stopCamera(){webcam.stopStreaming();}
-*/
-
-
-    public static double vertP = 0.02;
-    public static double vertI = 0;
-    public static double vertD = 0.0002;
-    public static double vertF = 0.00016;
+    public static double vertP = 0.035;
+    public static double vertI = 0.00002;
+    public static double vertD = 0.0003;
+    public static double vertF = 0.00018;
     private static final PIDFController vertSlidePIDF = new PIDFController(vertP, vertI, vertD, vertF);
     public static double vertSetPoint = 0;
     public static double vertMaxPowerConstant = 1.0;
@@ -458,13 +458,72 @@ public class atlantisAutoEssentials extends LinearOpMode {
 
                 horizSlides.setPower(horizPower);
 
+                telemetry.addData("Ticks to Block", ticksToBlock);
+                telemetry.addData("inchesToBlock", inchesToBlock);
+                telemetry.addData("isVertical", vertical);
+                telemetry.addLine();
+                telemetry.addData("Horiz Target Position", horizSetPoint);
+                telemetry.addData("Horiz Current Position", horizSlides.getCurrentPosition());
+                telemetry.addData("Horiz Error", Math.abs(horizSetPoint - horizSlides.getCurrentPosition()));
+                telemetry.addData("Horiz Power", horizPower);
+                telemetry.addLine();
+                telemetry.addData("Vert Target Position", vertSetPoint);
+                telemetry.addData("Vert Current Position", vertSlides.getCurrentPosition());
+                telemetry.addData("Vert Error", Math.abs(vertSetPoint - vertSlides.getCurrentPosition()));
+                telemetry.addData("Vert Power", vertPower);
+                telemetry.update();
+
                 return true;
             }
         };
     }
 
+
+
+
+
+    public Action updateLimelight(){
+        return new InstantAction(() -> {
+            result = limelight.getLatestResult();
+            colorResults = result.getColorResults();
+            ticksToBlock = (int) (Math.round(result.getTy()) * 15);
+            inchesToBlock = (-0.298642*(result.getTx()))-0.11495;
+            vertical = colorResults.stream().map(colorTarget -> isVertical(colorTarget.getTargetCorners())).findFirst().orElse(true);
+            clawPosBlock = vertical ? intakeWristVert : intakeWristHoriz;
+        });
+    }
+
+    public static Boolean isVertical(List<List<Double>> points) {
+        if (points.isEmpty()) {
+            return true; // Return true if there's no valid data
+        }
+
+        double minX = points.stream().mapToDouble(p -> p.get(0)).min().orElse(Double.NaN);
+        double maxX = points.stream().mapToDouble(p -> p.get(0)).max().orElse(Double.NaN);
+        double minY = points.stream().mapToDouble(p -> p.get(1)).min().orElse(Double.NaN);
+        double maxY = points.stream().mapToDouble(p -> p.get(1)).max().orElse(Double.NaN);
+
+        if (Double.isNaN(minX) || Double.isNaN(maxX) || Double.isNaN(minY) || Double.isNaN(maxY)) {
+            return true; // If for some reason values are invalid, assume vertical
+        }
+
+        return (maxY - minY) >= (maxX - minX); // True if vertical, False if horizontal
+    }
+
+    public static int ticksToBlock = 480;
+    public static double inchesToBlock = 0;
+    public static boolean vertical = true;
+    public static double clawPosBlock = 0.525;
+
+
+
+
+
+
     @Override
     public void runOpMode(){
     }
+
+
 }
 

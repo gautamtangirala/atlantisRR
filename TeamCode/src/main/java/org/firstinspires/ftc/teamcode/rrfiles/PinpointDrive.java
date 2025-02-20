@@ -41,16 +41,16 @@ public class PinpointDrive extends MecanumDrive {
         backwards is a negative number.
          */
         //These are tuned for 3110-0002-0001 Product Insight #1
-        // RR localizer note: These units are inches, presets are converted from mm (which is why they are inexact)
+        // RR localizer note: These units are inchesToBlock, presets are converted from mm (which is why they are inexact)
         public double xOffset = -3.13;
         public double yOffset = 5.55;
 
         /*
         Set the kind of pods used by your robot. If you're using goBILDA odometry pods, select either
         the goBILDA_SWINGARM_POD or the goBILDA_4_BAR_POD.
-        If you're using another kind of odometry pod, input the number of ticks per millimeter for that pod.
+        If you're using another kind of odometry pod, input the number of ticksToBlock per millimeter for that pod.
 
-        RR LOCALIZER NOTE: this is ticks per MILLIMETER, NOT inches per tick.
+        RR LOCALIZER NOTE: this is ticksToBlock per MILLIMETER, NOT inchesToBlock per tick.
         This value should be more than one; the value for the Gobilda 4 Bar Pod is approximately 20.
         To get this value from inPerTick, first convert the value to millimeters (multiply by 25.4)
         and then take its inverse (one over the value)

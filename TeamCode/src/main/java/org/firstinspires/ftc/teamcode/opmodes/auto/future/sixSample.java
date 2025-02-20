@@ -6,6 +6,7 @@ import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.SleepAction;
+import com.acmerobotics.roadrunner.TranslationalVelConstraint;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -14,8 +15,8 @@ import org.firstinspires.ftc.teamcode.opmodes.auto.atlantisAutoEssentials;
 import org.firstinspires.ftc.teamcode.rrfiles.PinpointDrive;
 
 
-@Autonomous (name = "Five Sample", preselectTeleOp = "atlantisTele")
-public class fiveSample extends atlantisAutoEssentials {
+@Autonomous (name = "Six Sample", preselectTeleOp = "atlantisTele")
+public class sixSample extends atlantisAutoEssentials {
 
 
     @Override
@@ -44,49 +45,48 @@ public class fiveSample extends atlantisAutoEssentials {
                 .afterTime(0, openIntake())
 
                 .strafeToLinearHeading(dropVector, dropAngle)
-                .stopAndAdd( new SequentialAction(moveSlideHighBasket(), depositTransferAction(0.7), new SleepAction(0.25), openDeposit(), new SleepAction(0.25), depositTransferAction(0.5)))
+                .stopAndAdd( new SequentialAction(moveSlideHighBasket(), depositTransferAction(0.7), new SleepAction(0.15), openDeposit(), new SleepAction(0.35), depositTransferAction(0.5)))
                 .build();
 
         Action block2 = drive.actionBuilder(dropPose)
                 .afterTime(0.1,moveSlideBottom())
+                .afterTime(0.5, horizSlideOut(false))
                 .strafeToLinearHeading(new Vector2d(-49.25, -51), Math.toRadians(90))
-                .stopAndAdd(new SequentialAction(horizSlideOut(false), new SleepAction(0.1), clawPickup(), new SleepAction(0.5), closeIntake(), new SleepAction(0.1)))
+                .stopAndAdd(new SequentialAction(intakeTransferAction(0.9),new SleepAction(0.1), clawPickup(), new SleepAction(0.5), closeIntake(), new SleepAction(0.1)))
 
                 //transfer
                 .afterTime(0, transfer(1))
-                .afterTime(0.5, transfer(2))
-                .afterTime(1, closeDeposit())
-                .afterTime(1.1, openIntake())
-                .afterTime(1.35, transfer(3))
-
-
+                .afterTime(0.5, closeDeposit())
+                .afterTime(0.6, openIntake())
+                .afterTime(0.8, transfer(3))
 
                 //drop block
-                .afterTime(1.35, new SequentialAction(moveSlideHighBasket(), depositTransferAction(0.7), new SleepAction(0.25), openDeposit(), new SleepAction(0.25), depositTransferAction(0.5)))
+                .afterTime(0.8, new SequentialAction(moveSlideHighBasket(), depositTransferAction(0.7), new SleepAction(0.15), openDeposit(), new SleepAction(0.35), depositTransferAction(0.5)))
                 .strafeToLinearHeading(dropVector, dropAngle)
                 .build();
 
         Action block3 = drive.actionBuilder(dropPose)
                 .afterTime(0.1,moveSlideBottom())
+                .afterTime(0.5, horizSlideOut(false))
                 .strafeToLinearHeading(new Vector2d(-59.25, -51), Math.toRadians(90))
-                .stopAndAdd(new SequentialAction(horizSlideOut(false), new SleepAction(0.1), clawPickup(), new SleepAction(0.5), closeIntake(), new SleepAction(0.1)))
+                .stopAndAdd(new SequentialAction(intakeTransferAction(0.9),new SleepAction(0.1), clawPickup(), new SleepAction(0.5), closeIntake(), new SleepAction(0.1)))
 
                 //transfer
                 .afterTime(0, transfer(1))
-                .afterTime(0.5, transfer(2))
-                .afterTime(1, closeDeposit())
-                .afterTime(1.1, openIntake())
-                .afterTime(1.35, transfer(3))
+                .afterTime(0.5, closeDeposit())
+                .afterTime(0.6, openIntake())
+                .afterTime(0.8, transfer(3))
 
                 //drop block
-                .afterTime(1.35, new SequentialAction(moveSlideHighBasket(), depositTransferAction(0.7), new SleepAction(0.25), openDeposit(), new SleepAction(0.25), depositTransferAction(0.5)))
+                .afterTime(0.8, new SequentialAction(moveSlideHighBasket(), depositTransferAction(0.7), new SleepAction(0.15), openDeposit(), new SleepAction(0.35), depositTransferAction(0.5)))
                 .strafeToLinearHeading(dropVector, dropAngle)
                 .build();
 
         Action block4 = drive.actionBuilder(dropPose)
                 .afterTime(0.1,moveSlideBottom())
+                .afterTime(1, new ParallelAction(horizSlideOut(false), moveWrist(0)))
                 .strafeToLinearHeading(new Vector2d(-44.25, -28), Math.toRadians(180))
-                .stopAndAdd( new SequentialAction( new ParallelAction(horizSlideOut(false), moveWrist(0)), intakeTransferAction(0.9), new SleepAction(0.1), clawPickup(), new SleepAction(0.5), closeIntake(), new SleepAction(0.1)))
+                .stopAndAdd( new SequentialAction(intakeTransferAction(0.9), new SleepAction(0.1), clawPickup(), new SleepAction(0.5), closeIntake(), new SleepAction(0.1)))
 
                 //transfer
                 .afterTime(0, transfer(1))
@@ -96,15 +96,15 @@ public class fiveSample extends atlantisAutoEssentials {
                 .afterTime(1.35, transfer(3))
 
                 //drop block
-                .afterTime(1.35, new SequentialAction(moveSlideHighBasket(), depositTransferAction(0.75), new SleepAction(0.25), openDeposit(), new SleepAction(0.25), depositTransferAction(0.5)))
+                .afterTime(1.35, new SequentialAction(moveSlideHighBasket(), depositTransferAction(0.7), new SleepAction(0.15), openDeposit(), new SleepAction(0.35), depositTransferAction(0.5)))
                 .strafeToLinearHeading(dropVector, dropAngle)
                 .build();
 
 
         Action end = drive.actionBuilder(dropPose)
                 .afterTime(0.5,moveSlidePark())
-                .splineToLinearHeading(new Pose2d(-25, -7, Math.toRadians(180)), Math.toRadians(0))
-                .stopAndAdd(depositTransferAction(0.7))
+                .afterTime(1, depositTransferAction(0.7))
+                .splineToLinearHeading(new Pose2d(-25, -10, Math.toRadians(180)), Math.toRadians(0))
                 .waitSeconds(0.1)
                 .build();
 
@@ -112,6 +112,7 @@ public class fiveSample extends atlantisAutoEssentials {
         depositGrab(depositClawClose);
         depositTransfer.setPosition(0.5);
         intakeTransfer.setPosition(intakeTransferIn);
+        intakeClawTilt.setPosition(0.85);
 
 
 
@@ -196,29 +197,46 @@ public class fiveSample extends atlantisAutoEssentials {
 
         waitForStart();
 
-        sample5Y *= 1.25;
-        sample5X *= 1.25;
+        sample5Y *= 1.2;
+        sample5X *= 1.2;
 
         Action block5 = drive.actionBuilder(dropPose)
                 .afterTime(0.1,moveSlideBottom())
                 .afterTime(0, moveWrist(sample5Vert ? 0.525: 0))
-                .splineToLinearHeading(new Pose2d(-32, sample5Y, Math.toRadians(0)), Math.toRadians(0))
-                .strafeToConstantHeading(new Vector2d(sample5X - 25.5, sample5Y))
-                .stopAndAdd( new SequentialAction( new ParallelAction(horizSlideOut(true), moveWrist(sample5Vert ? 0.525: 0)), new SleepAction(0.1), clawPickup(), new SleepAction(0.5), closeIntake(), new SleepAction(0.1)))
+                .splineToLinearHeading(new Pose2d(sample5X -25.5, sample5Y, Math.toRadians(0)), Math.toRadians(0), new TranslationalVelConstraint(80))
+                .stopAndAdd( new SequentialAction( new ParallelAction(horizSlideOut(true), moveWrist(sample5Vert ? 0.525: 0)), new SleepAction(0.1), clawPickup(), new SleepAction(0.5), closeIntake(), new SleepAction(0.25)))
 
                 //transfer
                 .afterTime(0, transfer(1))
                 .afterTime(0.5, transfer(2))
                 .afterTime(1, closeDeposit())
                 .afterTime(1.1, openIntake())
-                .afterTime(1.35, new ParallelAction( transfer(3), moveSlideHighBasket()))
+                .afterTime(1.35, new ParallelAction( transfer(3), new SequentialAction(moveSlideHighBasket(), depositTransferAction(0.7))))
 
                 //drop block
-                .strafeToConstantHeading(new Vector2d(-45, sample5Y))
-                .strafeToLinearHeading(dropVector, dropAngle)
-                .stopAndAdd(new SequentialAction(depositTransferAction(0.7), new SleepAction(0.25), openDeposit(), new SleepAction(0.25), depositTransferAction(0.5)))
+                .splineToConstantHeading(new Vector2d(-45, sample5Y), Math.toRadians(270), new TranslationalVelConstraint(80))
+                .splineToSplineHeading(dropPose, Math.toRadians(270), new TranslationalVelConstraint(80))
+                .stopAndAdd(new SequentialAction(new SleepAction(0.1), openDeposit(), new SleepAction(0.25), depositTransferAction(0.5)))
                 .build();
 
+            Action block6 = drive.actionBuilder(dropPose)
+                    .afterTime(0.1,moveSlideBottom())
+                    .afterTime(0, moveWrist(sample5Vert ? 0.525: 0))
+                    .splineToLinearHeading(new Pose2d(sample5X -25.5, sample5Y, Math.toRadians(0)), Math.toRadians(0), new TranslationalVelConstraint(80))
+                    .stopAndAdd( new SequentialAction( new ParallelAction(horizSlideOut(true), moveWrist(sample5Vert ? 0.525: 0)), new SleepAction(0.1), clawPickup(), new SleepAction(0.5), closeIntake(), new SleepAction(0.25)))
+
+                    //transfer
+                    .afterTime(0, transfer(1))
+                    .afterTime(0.5, transfer(2))
+                    .afterTime(1, closeDeposit())
+                    .afterTime(1.1, openIntake())
+                    .afterTime(1.35, new ParallelAction( transfer(3), new SequentialAction(moveSlideHighBasket(), depositTransferAction(0.7))))
+
+                    //drop block
+                    .splineToConstantHeading(new Vector2d(-45, sample5Y), Math.toRadians(270), new TranslationalVelConstraint(80))
+                    .splineToSplineHeading(dropPose, Math.toRadians(270), new TranslationalVelConstraint(80))
+                    .stopAndAdd(new SequentialAction(new SleepAction(0.1), openDeposit(), new SleepAction(0.25), depositTransferAction(0.5)))
+                    .build();
 
 
         Actions.runBlocking(
@@ -229,6 +247,7 @@ public class fiveSample extends atlantisAutoEssentials {
                         block3,
                         block4,
                         block5,
+                        block6,
                         end
                 ))
         );

@@ -90,7 +90,7 @@ public class SensorGoBildaPinpointExample extends LinearOpMode {
         Set the kind of pods used by your robot. If you're using goBILDA odometry pods, select either
         the goBILDA_SWINGARM_POD, or the goBILDA_4_BAR_POD.
         If you're using another kind of odometry pod, uncomment setEncoderResolution and input the
-        number of ticks per mm of your odometry pod.
+        number of ticksToBlock per mm of your odometry pod.
          */
         odo.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
         //odo.setEncoderResolution(13.26291192);
@@ -158,7 +158,7 @@ public class SensorGoBildaPinpointExample extends LinearOpMode {
 
 
             /*
-            gets the current Position (x & y in inches, and heading in radians) of the robot, and prints it.
+            gets the current Position (x & y in inchesToBlock, and heading in radians) of the robot, and prints it.
              */
             Pose2d pos = odo.getPositionRR();
             String data = String.format(Locale.US, "{X: %.3f, Y: %.3f, H: %.3f}", pos.position.x, pos.position.y, pos.heading.toDouble());
@@ -166,7 +166,7 @@ public class SensorGoBildaPinpointExample extends LinearOpMode {
 
 
             /*
-            gets the current Velocity (x & y in inches/sec and heading in radians/sec) and prints it.
+            gets the current Velocity (x & y in inchesToBlock/sec and heading in radians/sec) and prints it.
              */
             PoseVelocity2d vel = odo.getVelocityRR();
             String velocity = String.format(Locale.US,"{XVel: %.3f, YVel: %.3f, HVel: %.3f}", vel.linearVel.x, vel.linearVel.y, vel.angVel);
