@@ -10,11 +10,13 @@ import com.acmerobotics.roadrunner.TranslationalVelConstraint;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.opmodes.auto.atlantisAutoEssentials;
 import org.firstinspires.ftc.teamcode.rrfiles.PinpointDrive;
 
 
+@Disabled
 @Autonomous (name = "Six Sample Vision", preselectTeleOp = "atlantisTele")
 public class sixSampleVisionSlides extends atlantisAutoEssentials {
 
@@ -209,7 +211,7 @@ public class sixSampleVisionSlides extends atlantisAutoEssentials {
                 .afterTime(0.1,moveSlideBottom())
                 .afterTime(0, moveWrist(sample5Vert ? 0.525: 0))
                 .splineToLinearHeading(new Pose2d(sample5X -25.5, sample5Y, Math.toRadians(0)), Math.toRadians(0), new TranslationalVelConstraint(80))
-                .stopAndAdd( new SequentialAction( updateLimelight(), new SleepAction(0.05), new ParallelAction(horizSlideOut(true, ticksToBlock), moveWrist(clawPosBlock)), new SleepAction(0.1), clawPickup(), new SleepAction(0.5), closeIntake(), new SleepAction(0.25)))
+                .stopAndAdd( new SequentialAction( updateLimelight(0.05), new SleepAction(0.05), new ParallelAction(horizSlideOut(true, ticksToBlock), moveWrist(clawPosBlock)), new SleepAction(0.1), clawPickup(), new SleepAction(0.5), closeIntake(), new SleepAction(0.25)))
 
                 //transfer
                 .afterTime(0, transfer(1))
@@ -228,7 +230,7 @@ public class sixSampleVisionSlides extends atlantisAutoEssentials {
                     .afterTime(0.1,moveSlideBottom())
                     .afterTime(0, moveWrist(sample5Vert ? 0.525: 0))
                     .splineToLinearHeading(new Pose2d(sample5X -25.5, sample5Y, Math.toRadians(0)), Math.toRadians(0), new TranslationalVelConstraint(80))
-                    .stopAndAdd( new SequentialAction( updateLimelight(), new SleepAction(0.05), new ParallelAction(horizSlideOut(true, ticksToBlock), moveWrist(clawPosBlock)), new SleepAction(0.1), clawPickup(), new SleepAction(0.5), closeIntake(), new SleepAction(0.25)))
+                    .stopAndAdd( new SequentialAction( updateLimelight(0.05), new SleepAction(0.05), new ParallelAction(horizSlideOut(true, ticksToBlock), moveWrist(clawPosBlock)), new SleepAction(0.1), clawPickup(), new SleepAction(0.5), closeIntake(), new SleepAction(0.25)))
 
                     //transfer
                     .afterTime(0, transfer(1))

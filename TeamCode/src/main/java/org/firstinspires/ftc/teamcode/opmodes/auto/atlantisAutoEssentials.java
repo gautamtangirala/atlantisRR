@@ -17,6 +17,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 import org.openftc.easyopencv.OpenCvWebcam;
@@ -321,8 +322,6 @@ public class atlantisAutoEssentials extends LinearOpMode {
 
 
     public Action clawPickup() {
-
-
         return new InstantAction(() -> {
             openIntake();
             depositTransfer.setPosition(depositTransferIn);
@@ -423,7 +422,17 @@ public class atlantisAutoEssentials extends LinearOpMode {
     int horizMotorPosition;
 
     // Run in parallel w auto
+    public boolean breakPID = true;
+
+    public Action endPID(){
+        return new InstantAction(() -> {
+            breakPID = false;
+        });
+    }
+
     public Action updatePidAction() {
+        breakPID = true;
+
         return new Action() {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
@@ -473,7 +482,7 @@ public class atlantisAutoEssentials extends LinearOpMode {
                 telemetry.addData("Vert Power", vertPower);
                 telemetry.update();
 
-                return true;
+                return breakPID;
             }
         };
     }
@@ -482,15 +491,23 @@ public class atlantisAutoEssentials extends LinearOpMode {
 
 
 
-    public Action updateLimelight(){
-        return new InstantAction(() -> {
-            result = limelight.getLatestResult();
-            colorResults = result.getColorResults();
-            ticksToBlock = (int) (Math.round(result.getTy()) * 15);
-            inchesToBlock = (-0.298642*(result.getTx()))-0.11495;
-            vertical = colorResults.stream().map(colorTarget -> isVertical(colorTarget.getTargetCorners())).findFirst().orElse(true);
-            clawPosBlock = vertical ? intakeWristVert : intakeWristHoriz;
-        });
+    public Action updateLimelight(double timeout){
+        ElapsedTime llTimer = new ElapsedTime();
+        limelight.captureSnapshot("subPov");
+        return new Action() {
+
+                @Override
+                public boolean run(@NonNull TelemetryPacket packet){
+
+                result = limelight.getLatestResult();
+                colorResults = result.getColorResults();
+                ticksToBlock = (0.126217 * Math.pow(result.getTy(), 2) + 9.12149 * result.getTy() + 57.78645) < 58 ? 480 : (int) (0.126217 * Math.pow(result.getTy(), 2) + 9.12149 * result.getTy() + 57.78645);;
+                inchesToBlock =  -0.0002868 * Math.pow(result.getTx(), 2) - 0.31174 * result.getTx() - 0.240699;;
+                vertical = colorResults.stream().map(colorTarget -> isVertical(colorTarget.getTargetCorners())).findFirst().orElse(true);
+                clawPosBlock = vertical ? intakeWristVert : intakeWristHoriz;
+
+                return timeout > llTimer.milliseconds();
+        }};
     }
 
     public static Boolean isVertical(List<List<Double>> points) {

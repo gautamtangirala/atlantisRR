@@ -47,6 +47,8 @@ public class fullVisionTest extends atlantisAutoEssentials {
         depositTransfer.setPosition(0.5);
         intakeTransfer.setPosition(intakeTransferIn);
         intakeClawTilt.setPosition(0.85);
+        horizSetPoint = 0;
+        vertSetPoint = 0;
         limelight.setPollRateHz(100);
         limelight.start();
 
@@ -64,12 +66,17 @@ public class fullVisionTest extends atlantisAutoEssentials {
 
         Actions.runBlocking(
                 new ParallelAction( updatePidAction(),
+                        new SequentialAction(
+                                updateLimelight(5),
+                                endPID()
+                        )    )
+        );
+
+        Actions.runBlocking(
+                new ParallelAction( updatePidAction(),
                         drive.actionBuilder(startPose)
-                                .stopAndAdd(new SleepAction(5))
-                        .stopAndAdd(updateLimelight())
-                        .stopAndAdd(new SleepAction(5))
-                        .strafeToConstantHeading(new Vector2d(0, inchesToBlock))
-                        .stopAndAdd(new SequentialAction(new ParallelAction(horizSlideOut(true, ticksToBlock), moveWrist(clawPosBlock)), new SleepAction(0.1), clawPickup(), new SleepAction(0.5), closeIntake(), new SleepAction(0.25))).build()
+                                .strafeToConstantHeading(new Vector2d(0, inchesToBlock))
+                                .stopAndAdd(new SequentialAction(new ParallelAction(horizSlideOut(true, ticksToBlock), moveWrist(clawPosBlock)), new SleepAction(0.1), clawPickup(), new SleepAction(0.5), closeIntake(), new SleepAction(0.25))).build()
                 )
         );
 

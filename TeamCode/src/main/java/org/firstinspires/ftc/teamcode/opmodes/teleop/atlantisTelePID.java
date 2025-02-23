@@ -1,14 +1,18 @@
 package org.firstinspires.ftc.teamcode.opmodes.teleop;
 
 import com.arcrobotics.ftclib.controller.PIDFController;
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.configuration.LynxConstants;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
+
+import java.util.List;
 
 
 @TeleOp(name = "atlantisTele")
@@ -28,6 +32,9 @@ public class atlantisTelePID extends LinearOpMode {
 
     public DcMotorEx LF, LB, RF, RB; // Drive motors
 
+    LynxModule CONTROL_HUB, EXPANSION_HUB;
+    List<LynxModule> allHubs;
+
 
     //Variables
     double depositClawClose = 0.45;
@@ -46,10 +53,10 @@ public class atlantisTelePID extends LinearOpMode {
     double intakeTransferIn = 0.45;
 
     int highRungHeight = 525;
-    int highBasketHeight = 970;
+    int highBasketHeight = 980;
 
 
-    int horizTransferPos = 34;
+    int horizTransferPos = 37;
     int horizOutPos = 470;
 
     double intakeWristVert = 0.525;
@@ -69,6 +76,17 @@ public class atlantisTelePID extends LinearOpMode {
 
     @Override
     public void runOpMode() {
+        allHubs = hardwareMap.getAll(LynxModule.class);
+
+        if(allHubs.get(0).isParent() && LynxConstants.isEmbeddedSerialNumber(allHubs.get(0).getSerialNumber())) {
+            CONTROL_HUB = allHubs.get(0);
+            EXPANSION_HUB = allHubs.get(1);
+        } else {
+            CONTROL_HUB = allHubs.get(1);
+            EXPANSION_HUB = allHubs.get(0);
+        }
+
+
         initMotors();
         initServos();
 
@@ -78,6 +96,11 @@ public class atlantisTelePID extends LinearOpMode {
         vertSetPoint = vertSlides.getCurrentPosition();
 
         while (opModeIsActive()) {
+            for (LynxModule hub : allHubs) {
+                if (hub.getDeviceName().equals("Servo Hub 3")) return;
+                CONTROL_HUB.clearBulkCache();
+                EXPANSION_HUB.clearBulkCache();
+            }
             updatePID();
             // Gamepad 1: Holonomic drive
             holonomicDrive();
@@ -123,7 +146,7 @@ public class atlantisTelePID extends LinearOpMode {
                 } else if (gamepad2.dpad_right) {
                     horizontalSlidesIn();
                 } else if(gamepad2.dpad_left){
-
+                    intakeClaw(intakeClawOpen);
                 }
 
                 // Common Controls
@@ -389,16 +412,7 @@ public class atlantisTelePID extends LinearOpMode {
 
                 horizSetPoint = horizTransferPos;
                 transferTimer.reset();
-                transferState = TransferState.DEP_SLIDES;
-                break;
-
-            case DEP_SLIDES:
-                if(transferTimer.milliseconds() > 300){
-
-                    horizSetPoint = horizTransferPos;
-                    transferTimer.reset();
-                    transferState = TransferState.WAIT_SLIDES;
-                }
+                transferState = TransferState.WAIT_SLIDES;
                 break;
 
             case WAIT_SLIDES:
@@ -420,7 +434,7 @@ public class atlantisTelePID extends LinearOpMode {
                 break;
 
             case WAIT_OPEN_CLAW:
-                if (transferTimer.milliseconds() > 150) {
+                if (transferTimer.milliseconds() > 200) {
                     intakeTransfer.setPosition(intakeTransferIn+0.3);
                     depositTransfer.setPosition(0.5);
                     transferState = TransferState.DONE;

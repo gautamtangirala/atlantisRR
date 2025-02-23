@@ -73,8 +73,9 @@ public class sixSampleVisionFull extends atlantisAutoEssentials {
                 .afterTime(0.1,moveSlideBottom())
                 .afterTime(0.5, horizSlideOut(false))
                 .strafeToLinearHeading(new Vector2d(-59.25, -51), Math.toRadians(90))
-                .stopAndAdd(new SequentialAction(intakeTransferAction(0.9),new SleepAction(0.1),clawPickup(), new SleepAction(0.5), closeIntake(), new SleepAction(0.1)))
+                .stopAndAdd(new SequentialAction(intakeTransferAction(0.9),new SleepAction(0.1)))
                 .stopAndAdd(clawPickup())
+                .stopAndAdd(new SequentialAction( new SleepAction(0.5), closeIntake(), new SleepAction(0.1)))
 
                 //transfer
                 .afterTime(0, transfer(1))
@@ -90,18 +91,17 @@ public class sixSampleVisionFull extends atlantisAutoEssentials {
         Action block4 = drive.actionBuilder(dropPose)
                 .afterTime(0.1,moveSlideBottom())
                 .afterTime(1, new ParallelAction(horizSlideOut(false), moveWrist(0)))
-                .strafeToLinearHeading(new Vector2d(-44.25, -28), Math.toRadians(180))
+                .strafeToLinearHeading(new Vector2d(-44.25, -27.5), Math.toRadians(180))
                 .stopAndAdd( new SequentialAction(intakeTransferAction(0.9), new SleepAction(0.1), clawPickup(), new SleepAction(0.5), closeIntake(), new SleepAction(0.1)))
 
                 //transfer
                 .afterTime(0, transfer(1))
-                .afterTime(0.5, transfer(2))
-                .afterTime(1, closeDeposit())
-                .afterTime(1.1, openIntake())
-                .afterTime(1.35, transfer(3))
+                .afterTime(0.5, closeDeposit())
+                .afterTime(0.6, openIntake())
+                .afterTime(0.8, transfer(3))
 
                 //drop block
-                .afterTime(1.35, new SequentialAction(moveSlideHighBasket(), depositTransferAction(0.7), new SleepAction(0.15), openDeposit(), new SleepAction(0.35), depositTransferAction(0.5)))
+                .afterTime(0.8, new SequentialAction(moveSlideHighBasket(), depositTransferAction(0.7), new SleepAction(0.15), openDeposit(), new SleepAction(0.35), depositTransferAction(0.5)))
                 .strafeToLinearHeading(dropVector, dropAngle)
                 .build();
 
@@ -210,45 +210,16 @@ public class sixSampleVisionFull extends atlantisAutoEssentials {
         Action block5Sub = drive.actionBuilder(dropPose)
                 .afterTime(0.1,moveSlideBottom())
                 .afterTime(0, moveWrist(sample5Vert ? 0.525: 0))
-                .splineToLinearHeading(new Pose2d(sample5X -25.5, sample5Y, Math.toRadians(0)), Math.toRadians(0), new TranslationalVelConstraint(80))
-                .stopAndAdd( new SequentialAction( updateLimelight(), new SleepAction(0.05)))
+                .splineToLinearHeading(new Pose2d(sample5X -25.5, sample5Y, Math.toRadians(0)), Math.toRadians(0), new TranslationalVelConstraint(90))
                  .build();
 
-        TrajectoryActionBuilder block5PickDrop = drive.actionBuilder(new Pose2d(sample5X -25.5, sample5Y, Math.toRadians(0)))
-                .strafeToConstantHeading(new Vector2d(sample5X - 25.5, sample5Y + inchesToBlock))
-                .stopAndAdd(new SequentialAction(new ParallelAction(horizSlideOut(true, ticksToBlock), moveWrist(clawPosBlock)), new SleepAction(0.1), clawPickup(), new SleepAction(0.5), closeIntake(), new SleepAction(0.25)))
 
-                //transfer
-                .afterTime(0, transfer(1))
-                .afterTime(0.5, transfer(2))
-                .afterTime(1, closeDeposit())
-                .afterTime(1.1, openIntake())
-                .afterTime(1.35, new ParallelAction( transfer(3), new SequentialAction(moveSlideHighBasket(), depositTransferAction(0.7))))
 
-                //drop block
-                .splineToConstantHeading(new Vector2d(-45, sample5Y), Math.toRadians(270), new TranslationalVelConstraint(80))
-                .splineToSplineHeading(dropPose, Math.toRadians(270), new TranslationalVelConstraint(80))
-                .stopAndAdd(new SequentialAction(new SleepAction(0.1), openDeposit(), new SleepAction(0.25), depositTransferAction(0.5)))
-        ;
-
-        TrajectoryActionBuilder block6 = drive.actionBuilder(dropPose)
+        Action block6Sub = drive.actionBuilder(dropPose)
                     .afterTime(0.1,moveSlideBottom())
                     .afterTime(0, moveWrist(sample5Vert ? 0.525: 0))
-                    .splineToLinearHeading(new Pose2d(sample5X -25.5, sample5Y, Math.toRadians(0)), Math.toRadians(0), new TranslationalVelConstraint(80))
-                    .stopAndAdd( new SequentialAction( updateLimelight(), new SleepAction(0.05), new ParallelAction(horizSlideOut(true, ticksToBlock), moveWrist(clawPosBlock)), new SleepAction(0.1), clawPickup(), new SleepAction(0.5), closeIntake(), new SleepAction(0.25)))
-
-                    //transfer
-                    .afterTime(0, transfer(1))
-                    .afterTime(0.5, transfer(2))
-                    .afterTime(1, closeDeposit())
-                    .afterTime(1.1, openIntake())
-                    .afterTime(1.35, new ParallelAction( transfer(3), new SequentialAction(moveSlideHighBasket(), depositTransferAction(0.7))))
-
-                    //drop block
-                    .splineToConstantHeading(new Vector2d(-45, sample5Y), Math.toRadians(270), new TranslationalVelConstraint(80))
-                    .splineToSplineHeading(dropPose, Math.toRadians(270), new TranslationalVelConstraint(80))
-                    .stopAndAdd(new SequentialAction(new SleepAction(0.1), openDeposit(), new SleepAction(0.25), depositTransferAction(0.5)))
-                    ;
+                    .splineToLinearHeading(new Pose2d(sample5X -25.5, sample5Y, Math.toRadians(0)), Math.toRadians(0), new TranslationalVelConstraint(90))
+                .build();
 
 
         Actions.runBlocking(
@@ -259,12 +230,63 @@ public class sixSampleVisionFull extends atlantisAutoEssentials {
                         block3,
                         block4,
                         block5Sub,
-                        updateLimelight(),
-                        new SleepAction(0.1),
-                        block5PickDrop.build(),
-                        end
+                        updateLimelight(0.2),
+                        endPID()
                 ))
         );
+
+
+        TrajectoryActionBuilder block5PickDrop = drive.actionBuilder(new Pose2d(sample5X -25.5, sample5Y, Math.toRadians(0)))
+                .strafeToConstantHeading(new Vector2d(sample5X - 25.5, sample5Y + inchesToBlock))
+                .stopAndAdd(new SequentialAction(new ParallelAction(horizSlideOut(true, ticksToBlock), moveWrist(clawPosBlock)), new SleepAction(0.1), clawPickup(), new SleepAction(0.5), closeIntake(), new SleepAction(0.25)))
+
+                //transfer
+                .afterTime(0, transfer(1))
+                .afterTime(0.5, closeDeposit())
+                .afterTime(0.6, openIntake())
+                .afterTime(0.8, new ParallelAction( transfer(3), new SequentialAction(moveSlideHighBasket(), depositTransferAction(0.7))))
+
+                //drop block
+                .splineToConstantHeading(new Vector2d(-45, sample5Y), Math.toRadians(270), new TranslationalVelConstraint(80))
+                .splineToSplineHeading(dropPose, Math.toRadians(270), new TranslationalVelConstraint(80))
+                .stopAndAdd(new SequentialAction(new SleepAction(0.1), openDeposit(), new SleepAction(0.25), depositTransferAction(0.5)))
+                ;
+
+        Actions.runBlocking(      new ParallelAction( updatePidAction(),
+                new SequentialAction(
+                        block5PickDrop.build(),
+                        block6Sub,
+                        updateLimelight(0.2),
+                        endPID()
+                ))
+                );
+
+        TrajectoryActionBuilder block6PickDrop = drive.actionBuilder(new Pose2d(sample5X -25.5, sample5Y, Math.toRadians(0)))
+                .strafeToConstantHeading(new Vector2d(sample5X - 25.5, sample5Y + inchesToBlock))
+                .stopAndAdd(new SequentialAction(new ParallelAction(horizSlideOut(true, ticksToBlock), moveWrist(clawPosBlock)), new SleepAction(0.1), clawPickup(), new SleepAction(0.5), closeIntake(), new SleepAction(0.25)))
+
+                //transfer
+                .afterTime(0, transfer(1))
+                .afterTime(0.5, closeDeposit())
+                .afterTime(0.6, openIntake())
+                .afterTime(0.8, new ParallelAction( transfer(3), new SequentialAction(moveSlideHighBasket(), depositTransferAction(0.7))))
+
+
+                //drop block
+                .splineToConstantHeading(new Vector2d(-45, sample5Y), Math.toRadians(270), new TranslationalVelConstraint(80))
+                .splineToSplineHeading(dropPose, Math.toRadians(270), new TranslationalVelConstraint(80))
+                .stopAndAdd(new SequentialAction(new SleepAction(0.1), openDeposit(), new SleepAction(0.25), depositTransferAction(0.5)))
+                ;
+
+        Actions.runBlocking(      new ParallelAction( updatePidAction(),
+                new SequentialAction(
+                        block6PickDrop.build(),
+                        end,
+                        endPID()
+                ))
+        );
+
+        limelight.stop();
 
     }
 
