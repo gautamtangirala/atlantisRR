@@ -47,8 +47,6 @@ public class atlantisTelePID extends LinearOpMode {
     double intakeClawClose = 0.45;  
     double intakeClawOpen = 0.1;
 
-
-
     double intakeTransferOut = 1;
     double intakeTransferIn = 0.45;
 
@@ -146,7 +144,7 @@ public class atlantisTelePID extends LinearOpMode {
                 } else if (gamepad2.dpad_right) {
                     horizontalSlidesIn();
                 } else if(gamepad2.dpad_left){
-                    intakeClaw(intakeClawOpen);
+                    lowBasket();
                 }
 
                 // Common Controls
@@ -168,6 +166,14 @@ public class atlantisTelePID extends LinearOpMode {
             } else if (gamepad1.y) {
                 specimenMode = true;
                 sampleMode = false;
+            }
+
+            if(gamepad1.dpad_down){
+                vertSetPoint = 190;
+                depositTransfer.setPosition(0.7);
+            }
+            if(gamepad1.x){
+                depositClaw(depositClawOpen);
             }
 
             if (gamepad1.left_bumper) {
@@ -247,12 +253,17 @@ public class atlantisTelePID extends LinearOpMode {
         double horizontal = gamepad1.right_stick_x * slowedDownMulti;
         double pivot = gamepad1.left_stick_x * turnMulti;
 
-        if (specimenMode){
-            slowedDownMulti = 0.6;
+        if (gamepad1.left_trigger > 0.1){
+            slowedDownMulti = 1;
+        } else {
+            if (specimenMode) {
+
+                slowedDownMulti = 0.6;
+            } else {
+                slowedDownMulti = 0.8;
+            }
         }
-        else {
-            slowedDownMulti = 0.8;
-        }
+
 
         LF.setPower(pivot + vertical + horizontal);
         LB.setPower(pivot + vertical - horizontal);
@@ -452,9 +463,16 @@ public class atlantisTelePID extends LinearOpMode {
 
 
 
+
     public void highRung() {
         depositClaw(depositClawClose);
         vertSetPoint = highRungHeight;
+    }
+
+    public void lowBasket() {
+        depositTransfer.setPosition(0.7);
+        depositClaw(depositClawClose);
+        vertSetPoint = 600;
     }
 
     public enum HighBasketState {
@@ -497,6 +515,11 @@ public class atlantisTelePID extends LinearOpMode {
                 break;
         }
     }
+
+
+
+
+
 
 
 

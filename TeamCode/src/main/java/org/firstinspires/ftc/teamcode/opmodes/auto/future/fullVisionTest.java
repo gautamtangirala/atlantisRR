@@ -51,6 +51,7 @@ public class fullVisionTest extends atlantisAutoEssentials {
         vertSetPoint = 0;
         limelight.setPollRateHz(100);
         limelight.start();
+        limelight.pipelineSwitch(2);
 
 
 
@@ -67,7 +68,9 @@ public class fullVisionTest extends atlantisAutoEssentials {
         Actions.runBlocking(
                 new ParallelAction( updatePidAction(),
                         new SequentialAction(
-                                updateLimelight(5),
+                                new SleepAction(1),
+                                updateLimelightNeural("red"),
+                                new SleepAction(2),
                                 endPID()
                         )    )
         );
@@ -75,7 +78,7 @@ public class fullVisionTest extends atlantisAutoEssentials {
         Actions.runBlocking(
                 new ParallelAction( updatePidAction(),
                         drive.actionBuilder(startPose)
-                                .strafeToConstantHeading(new Vector2d(0, inchesToBlock))
+                                .strafeToConstantHeading(new Vector2d(0, -inchesToBlock))
                                 .stopAndAdd(new SequentialAction(new ParallelAction(horizSlideOut(true, ticksToBlock), moveWrist(clawPosBlock)), new SleepAction(0.1), clawPickup(), new SleepAction(0.5), closeIntake(), new SleepAction(0.25))).build()
                 )
         );

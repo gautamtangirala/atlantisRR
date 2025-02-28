@@ -2,12 +2,15 @@ package org.firstinspires.ftc.teamcode.opmodes.auto;
 
 import static java.lang.Math.round;
 
+import android.graphics.PointF;
+
 import androidx.annotation.NonNull;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.InstantAction;
+import com.acmerobotics.roadrunner.SequentialAction;
 import com.arcrobotics.ftclib.controller.PIDFController;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
@@ -19,10 +22,18 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
+import org.opencv.core.Core;
+import org.opencv.core.CvType;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint2f;
+import org.opencv.core.Point;
+import org.opencv.imgproc.Imgproc;
 
 import org.openftc.easyopencv.OpenCvWebcam;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /*
  * This is meant to be a library!
@@ -74,7 +85,7 @@ public class atlantisAutoEssentials extends LinearOpMode {
     public double intakeClawClose = 0.45;
     public double intakeClawOpen = 0.1;
 
-    public int horizTransferPos = 34;
+    public int horizTransferPos = 42;
     public int horizOutPos = 470;
 
     public double intakeTransferOut = 1;
@@ -304,7 +315,7 @@ public class atlantisAutoEssentials extends LinearOpMode {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 openIntake();
-                intakeTransfer.setPosition(sub ? 0.75 : 0.9);
+                intakeTransfer.setPosition(sub ? 0.8 : 0.9);
                 intakeClawTilt.setPosition(0.05);
                 horizSetPoint = pos;
 
@@ -535,6 +546,136 @@ public class atlantisAutoEssentials extends LinearOpMode {
 
 
 
+
+
+
+//    public Action findClosestYellowSample(double timeout) {
+//        return new Action() {
+//            @Override
+//            public boolean run(@NonNull TelemetryPacket packet) {
+//                ElapsedTime llTimer = new ElapsedTime();
+//                limelight.captureSnapshot("subPov");
+//
+//                // Initialize variables to track the closest yellow sample
+//                Double closestDistance = null;
+//                Double closestX = null;
+//                Double closestY = null;
+//                Double closestWristPos = null;
+//
+//                // Target coordinates
+//                final double targetX = -13.34;
+//                final double targetY = 22.09;
+//
+//                result = limelight.getLatestResult();
+//                List<LLResultTypes.DetectorResult> detections = result.getDetectorResults();
+//
+//                for (LLResultTypes.DetectorResult detection : detections) {
+//                    if (Objects.equals(detection.getClassName(), "yellow")) {
+//                        double detectedX = detection.getTargetXDegrees();
+//                        double detectedY = detection.getTargetYDegrees();
+//                        double detectedWristPos = isVertical(detection.getTargetCorners()) ? intakeWristVert : intakeWristHoriz;
+//
+//                        // Calculate Euclidean distance to the target coordinates
+//                        double distance = Math.sqrt(Math.pow(detectedX - targetX, 2) + Math.pow(detectedY - targetY, 2));
+//
+//                        // Find the closest yellow sample (smallest distance)
+//                        if (closestDistance == null || distance < closestDistance) {
+//                            closestDistance = distance;
+//                            closestX = detectedX;
+//                            closestY = detectedY;
+//                            closestWristPos = detectedWristPos;
+//                        }
+//                    }
+//                }
+//
+//                if (closestX != null && closestY != null) {
+//                    // Calculate position using provided formulas
+//                    ticksToBlock = (int) (12.4493 * closestY + 31.95);
+//                    inchesToBlock = (0.000141812 * Math.pow(closestX, 3) + 0.00747465 * Math.pow(closestX, 2) + 0.322884 * closestX - 0.588156);
+//
+//                    clawPosBlock = closestWristPos;
+//
+//                    // Telemetry output for debugging
+//                    telemetry.addData("Closest Yellow X", closestX);
+//                    telemetry.addData("Closest Yellow Y", closestY);
+//                    telemetry.addData("Wrist Position", closestWristPos);
+//                    telemetry.addData("Inches to Block", inchesToBlock);
+//                    telemetry.addData("Ticks to Block", ticksToBlock);
+//                    telemetry.addData("Distance to Target", closestDistance);
+//                } else {
+//                    telemetry.addData("Closest Yellow", "No Yellow Targets Found");
+//                }
+//
+//                telemetry.update();
+//                return timeout > llTimer.milliseconds();
+//            }
+//        };
+//    }
+
+
+
+
+
+
+    public Action updateLimelightNeural(String color) {
+        return new InstantAction(() -> {
+                result = limelight.getLatestResult();
+                List<LLResultTypes.DetectorResult> detections = result.getDetectorResults();
+                limelight.captureSnapshot("neuralPOV");
+
+
+            LLResultTypes.DetectorResult closestSample = null;
+            double minDistance = Double.MAX_VALUE;
+            Point targetPoint = new Point(200, 100); // Target location
+
+            for (LLResultTypes.DetectorResult detection : detections) {
+                if (Objects.equals(detection.getClassName(), "yellow") || Objects.equals(detection.getClassName(), color)) {
+
+
+                    // Define the weights for X and Y (1 means equal importance, >1 means more importance)
+                    double xWeight = 1;  // You can increase this if you want X to be more important
+                    double yWeight = 1.6;  // You can increase this if you want Y to be more important
+
+                    // Calculate the weighted distance
+                    double distance = Math.sqrt(
+                            Math.pow((detection.getTargetXPixels() - targetPoint.x) * xWeight, 2) +
+                                    Math.pow((detection.getTargetYPixels() - targetPoint.y) * yWeight, 2)
+                    );
+
+                    // Update closest sample
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        closestSample = detection;
+                    }
+
+                }
+            }
+
+
+            double x = closestSample.getTargetXPixels();
+            double y = closestSample.getTargetYPixels();
+
+            inchesToBlock = (0.0521189*x) - 13.39114;
+                ticksToBlock = (int) (806.63 * Math.pow(0.991325,y));
+            vertical = isVertical(closestSample.getTargetCorners());
+            clawPosBlock = vertical ? intakeWristVert : intakeWristHoriz;
+
+
+
+
+
+
+
+
+        });
+    }
+
+
+    public Action stopLimelight(){
+        return new InstantAction(() ->{
+            limelight.stop();
+        });
+    }
 
 
     @Override

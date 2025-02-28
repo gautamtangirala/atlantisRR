@@ -11,11 +11,13 @@ import com.acmerobotics.roadrunner.TranslationalVelConstraint;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.opmodes.auto.atlantisAutoEssentials;
 import org.firstinspires.ftc.teamcode.rrfiles.PinpointDrive;
 
 
+@Disabled
 @Autonomous (name = "Six Sample Vision Full", preselectTeleOp = "atlantisTele")
 public class sixSampleVisionFull extends atlantisAutoEssentials {
 
