@@ -44,7 +44,7 @@ public class fullVisionTest extends atlantisAutoEssentials {
 
 
         depositGrab(depositClawClose);
-        depositTransfer.setPosition(0.5);
+        depositTransfer.setPosition(0.4);
         intakeTransfer.setPosition(intakeTransferIn);
         intakeClawTilt.setPosition(0.85);
         horizSetPoint = 0;
@@ -64,6 +64,32 @@ public class fullVisionTest extends atlantisAutoEssentials {
                 .stopAndAdd(new SequentialAction(new ParallelAction(horizSlideOut(true, ticksToBlock), moveWrist(clawPosBlock)), new SleepAction(0.1), clawPickup(), new SleepAction(0.5), closeIntake(), new SleepAction(0.25)))
                 ;
 
+
+
+        Actions.runBlocking(
+                new ParallelAction( updatePidAction(),
+                        new SequentialAction(
+                                new SleepAction(1),
+                                updateLimelightNeural("red"),
+                                new SleepAction(2),
+                                endPID()
+                        )    )
+        );
+
+        Actions.runBlocking(
+                new ParallelAction( updatePidAction(),
+                        new SequentialAction(drive.actionBuilder(startPose)
+                                .strafeToConstantHeading(new Vector2d(0, -inchesToBlock))
+                                .stopAndAdd(new SequentialAction(new ParallelAction(horizSlideOut(true, ticksToBlock), moveWrist(clawPosBlock)), new SleepAction(0.1), clawPickup(), new SleepAction(0.5), closeIntake(), new SleepAction(0.25)))
+                                .stopAndAdd(new SleepAction(0.5))
+                                .stopAndAdd(transfer(1))
+                                .stopAndAdd(new SleepAction(0.5))
+                                .stopAndAdd(openIntake())
+                                .strafeToConstantHeading(startPose.position)
+                                .build()
+                                ,endPID())
+                )
+        );
 
         Actions.runBlocking(
                 new ParallelAction( updatePidAction(),

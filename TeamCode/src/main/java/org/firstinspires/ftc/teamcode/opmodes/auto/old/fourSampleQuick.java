@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.opmodes.auto.current;
+package org.firstinspires.ftc.teamcode.opmodes.auto.old;
 
 
 import com.acmerobotics.roadrunner.Action;
@@ -9,11 +9,13 @@ import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.opmodes.auto.atlantisAutoEssentials;
 import org.firstinspires.ftc.teamcode.rrfiles.PinpointDrive;
 
 
+@Disabled
 @Autonomous (name = "Four Sample", preselectTeleOp = "atlantisTele")
 public class fourSampleQuick extends atlantisAutoEssentials {
 
@@ -110,7 +112,7 @@ public class fourSampleQuick extends atlantisAutoEssentials {
 
 
         depositGrab(depositClawClose);
-        depositTransfer.setPosition(0.5);
+        depositTransfer.setPosition(0.4);
         intakeTransfer.setPosition(intakeTransferIn);
 
         waitForStart();

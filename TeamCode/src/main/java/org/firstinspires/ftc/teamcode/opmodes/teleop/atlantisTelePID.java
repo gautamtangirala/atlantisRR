@@ -472,7 +472,7 @@ public class atlantisTelePID extends LinearOpMode {
     public void lowBasket() {
         depositTransfer.setPosition(0.7);
         depositClaw(depositClawClose);
-        vertSetPoint = 600;
+        vertSetPoint = 500;
     }
 
     public enum HighBasketState {

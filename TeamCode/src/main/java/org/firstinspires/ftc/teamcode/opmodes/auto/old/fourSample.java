@@ -164,7 +164,7 @@ public class fourSample extends atlantisAutoEssentials {
 
 
         depositGrab(depositClawClose);
-        depositTransfer.setPosition(0.5);
+        depositTransfer.setPosition(0.4);
         intakeTransfer.setPosition(intakeTransferIn);
 
         waitForStart();

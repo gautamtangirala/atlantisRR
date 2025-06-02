@@ -121,7 +121,7 @@ public class fourSpeciSlides extends atlantisAutoEssentials {
                 .build();
 
         depositGrab(depositClawClose);
-        depositTransfer.setPosition(0.5);
+        depositTransfer.setPosition(0.4);
         intakeTransfer.setPosition(intakeTransferIn);
         intakeClawTilt.setPosition(0.85);
 

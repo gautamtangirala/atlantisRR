@@ -86,25 +86,7 @@ public class limelightTestNeural extends LinearOpMode {
             result = limelight.getLatestResult();
             List<LLResultTypes.DetectorResult> detections = result.getDetectorResults();
 
-            // Define source (pixel) and destination (real-world) points
-            Point[] srcPoints = new Point[4];
-            srcPoints[0] = new Point(250, 90);
-            srcPoints[1] = new Point(68, 86);
-            srcPoints[2] = new Point(9, 240);
-            srcPoints[3] = new Point(320, 240);
 
-            Point[] dstPoints = new Point[4];
-            dstPoints[0] = new Point(0, 10.625);
-            dstPoints[1] = new Point(11.375, 10.625);
-            dstPoints[2] = new Point(11.375, 0);
-            dstPoints[3] = new Point(0, 0);
-
-            // Convert points to MatOfPoint2f
-            MatOfPoint2f srcMat = new MatOfPoint2f(srcPoints);
-            MatOfPoint2f dstMat = new MatOfPoint2f(dstPoints);
-
-            // Compute perspective transform matrix
-            Mat transformMatrix = Imgproc.getPerspectiveTransform(srcMat, dstMat);
 
             LLResultTypes.DetectorResult closestSample = null;
             double minDistance = Double.MAX_VALUE;
@@ -133,18 +115,6 @@ public class limelightTestNeural extends LinearOpMode {
                 double y = closestSample.getTargetYPixels();
 
                 // Convert to Mat for perspective transformation
-                Mat pointMat = new Mat(1, 1, CvType.CV_32FC2);
-                pointMat.put(0, 0, new float[]{(float) x, (float) y});
-                Mat resultMat = new Mat();
-
-                // Apply perspective transform
-                Core.perspectiveTransform(pointMat, resultMat, transformMatrix);
-                float[] robotCoords = new float[2];
-                resultMat.get(0, 0, robotCoords);
-
-                // Extract transformed real-world coordinates
-                double realX = robotCoords[0];
-                double realY = robotCoords[1];
 
                 // Determine if the detected object is vertical
                 boolean vertical = isVertical(closestSample.getTargetCorners());
@@ -152,8 +122,9 @@ public class limelightTestNeural extends LinearOpMode {
                 // Print results to telemetry
                 telemetry.addData("Closest Yellow Sample (Pixels)", "X: " + x + ", Y: " + y);
                 telemetry.addData("Coordinates With X shifted", "X: " + (x - Math.tan(Math.toRadians(50))*y) + ", Y: " + y);
-                telemetry.addData("Transformed Robot Coordinates", "X: " + realX + ", Y: " + realY);
-                telemetry.addData("Is Vertical?", vertical);
+                telemetry.addData("Length/Height", SampleLWRatio(closestSample.getTargetCorners()));
+                telemetry.addData("Calculated Ticks", (int) (806.63 * Math.pow(0.991325, y)));
+
             } else {
                 telemetry.addData("Status", "No yellow samples detected.");
             }
@@ -165,6 +136,30 @@ public class limelightTestNeural extends LinearOpMode {
 
     }
 
+
+    public double SampleLWRatio(List<List<Double>> points) {
+        if (points.isEmpty()) {
+            return 0; // Return 0 if there's no valid data
+        }
+
+        double minX = points.stream().mapToDouble(p -> p.get(0)).min().orElse(Double.NaN);
+        double maxX = points.stream().mapToDouble(p -> p.get(0)).max().orElse(Double.NaN);
+        double minY = points.stream().mapToDouble(p -> p.get(1)).min().orElse(Double.NaN);
+        double maxY = points.stream().mapToDouble(p -> p.get(1)).max().orElse(Double.NaN);
+
+        if (Double.isNaN(minX) || Double.isNaN(maxX) || Double.isNaN(minY) || Double.isNaN(maxY)) {
+            return 0; // If values are invalid, return 0
+        }
+
+        double length = maxY - minY;
+        double width = maxX - minX;
+
+        if (width == 0) {
+            return Double.MAX_VALUE; // Avoid division by zero
+        }
+
+        return length / width; // Return the length-to-width ratio
+    }
 
     // Function to determine orientation
     public  Boolean isVertical(List<List<Double>> points) {

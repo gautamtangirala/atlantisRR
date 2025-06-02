@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.opmodes.auto.future;
+package org.firstinspires.ftc.teamcode.opmodes.auto.current;
 
 
 import com.acmerobotics.roadrunner.Action;
@@ -16,8 +16,8 @@ import org.firstinspires.ftc.teamcode.opmodes.auto.atlantisAutoEssentials;
 import org.firstinspires.ftc.teamcode.rrfiles.PinpointDrive;
 
 
-@Autonomous (name = "Six Sample Red", preselectTeleOp = "atlantisTele")
-public class sixSampleVisionFullNN extends atlantisAutoEssentials {
+@Autonomous (name = "Six Sample Blue", preselectTeleOp = "atlantisTele")
+public class sixSampleVisionFullNNBlue extends atlantisAutoEssentials {
 
 
     @Override
@@ -29,8 +29,8 @@ public class sixSampleVisionFullNN extends atlantisAutoEssentials {
         initLimelight();
         limelight.pipelineSwitch(2);
 
-        double fieldOffset = 0; //Change based on ridges of field
-        String color = "red";
+        double fieldOffset = 0.5; //Change based on ridges of field
+        String color = "blue";
         Pose2d startPose = new Pose2d(-40, -62.625 + fieldOffset, Math.toRadians(270));
         PinpointDrive drive = new PinpointDrive(hardwareMap, startPose);
 
@@ -117,7 +117,7 @@ public class sixSampleVisionFullNN extends atlantisAutoEssentials {
 
 
         depositGrab(depositClawClose);
-        depositTransfer.setPosition(0.5);
+        depositTransfer.setPosition(0.4);
         intakeTransfer.setPosition(intakeTransferIn);
         intakeClawTilt.setPosition(0.85);
         intakeClawWrist.setPosition(intakeWristVert);
@@ -196,7 +196,7 @@ public class sixSampleVisionFullNN extends atlantisAutoEssentials {
 
             // Telemetry data
 
-            telemetry.addLine("     **RED SIDE**     ");
+            telemetry.addLine("     **BLUE SIDE**     ");
             telemetry.addLine("6 SAMPLE AUTO: 96 POINTS");
             telemetry.addLine("ALIGN ROBOT SIDE WITH NET ZONE");
             telemetry.addLine(" ");

@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.opmodes.auto.future;
+package org.firstinspires.ftc.teamcode.opmodes.auto.current;
 
 
 import com.acmerobotics.roadrunner.Action;
@@ -11,15 +11,13 @@ import com.acmerobotics.roadrunner.TranslationalVelConstraint;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import org.firstinspires.ftc.teamcode.opmodes.auto.atlantisAutoEssentials;
 import org.firstinspires.ftc.teamcode.rrfiles.PinpointDrive;
 
 
-@Disabled
-@Autonomous (name = "Six Sample Vision Full", preselectTeleOp = "atlantisTele")
-public class sixSampleVisionFull extends atlantisAutoEssentials {
+@Autonomous (name = "Six Sample Red", preselectTeleOp = "atlantisTele")
+public class sixSampleVisionFullNN extends atlantisAutoEssentials {
 
 
     @Override
@@ -29,8 +27,10 @@ public class sixSampleVisionFull extends atlantisAutoEssentials {
         initDrive();
         initSubsystems();
         initLimelight();
+        limelight.pipelineSwitch(2);
 
-        double fieldOffset = 0; //Change based on ridges of field
+        double fieldOffset = 0.5; //Change based on ridges of field
+        String color = "red";
         Pose2d startPose = new Pose2d(-40, -62.625 + fieldOffset, Math.toRadians(270));
         PinpointDrive drive = new PinpointDrive(hardwareMap, startPose);
 
@@ -49,7 +49,7 @@ public class sixSampleVisionFull extends atlantisAutoEssentials {
                 .afterTime(0, openIntake())
 
                 .strafeToLinearHeading(dropVector, dropAngle)
-                .stopAndAdd( new SequentialAction(moveSlideHighBasket(), depositTransferAction(0.7), new SleepAction(0.15), openDeposit(), new SleepAction(0.35), depositTransferAction(0.5)))
+                .stopAndAdd( new SequentialAction(moveSlideHighBasket(), depositTransferAction(0.7), new SleepAction(0.15), openDeposit(), new SleepAction(0.2), depositTransferAction(0.5)))
                 .build();
 
         Action block2 = drive.actionBuilder(dropPose)
@@ -67,7 +67,7 @@ public class sixSampleVisionFull extends atlantisAutoEssentials {
                 .afterTime(0.8, transfer(3))
 
                 //drop block
-                .afterTime(0.8, new SequentialAction(moveSlideHighBasket(), depositTransferAction(0.7), new SleepAction(0.15), openDeposit(), new SleepAction(0.35), depositTransferAction(0.5)))
+                .afterTime(0.8, new SequentialAction(moveSlideHighBasket(), depositTransferAction(0.7), new SleepAction(0.15), openDeposit(), new SleepAction(0.2), depositTransferAction(0.5)))
                 .strafeToLinearHeading(dropVector, dropAngle)
                 .build();
 
@@ -75,9 +75,9 @@ public class sixSampleVisionFull extends atlantisAutoEssentials {
                 .afterTime(0.1,moveSlideBottom())
                 .afterTime(0.5, horizSlideOut(false))
                 .strafeToLinearHeading(new Vector2d(-59.25, -51), Math.toRadians(90))
-                .stopAndAdd(new SequentialAction(intakeTransferAction(0.9),new SleepAction(0.1)))
+                .stopAndAdd(new SequentialAction(horizSlideOut(false), intakeTransferAction(0.9),new SleepAction(0.1)))
                 .stopAndAdd(clawPickup())
-                .stopAndAdd(new SequentialAction( new SleepAction(0.5), closeIntake(), new SleepAction(0.1)))
+                .stopAndAdd(new SequentialAction( clawPickup(), new SleepAction(0.5), closeIntake(), new SleepAction(0.1)))
 
                 //transfer
                 .afterTime(0, transfer(1))
@@ -86,7 +86,7 @@ public class sixSampleVisionFull extends atlantisAutoEssentials {
                 .afterTime(0.8, transfer(3))
 
                 //drop block
-                .afterTime(0.8, new SequentialAction(moveSlideHighBasket(), depositTransferAction(0.7), new SleepAction(0.15), openDeposit(), new SleepAction(0.35), depositTransferAction(0.5)))
+                .afterTime(0.8, new SequentialAction(moveSlideHighBasket(), depositTransferAction(0.7), new SleepAction(0.15), openDeposit(), new SleepAction(0.2), depositTransferAction(0.5)))
                 .strafeToLinearHeading(dropVector, dropAngle)
                 .build();
 
@@ -103,15 +103,15 @@ public class sixSampleVisionFull extends atlantisAutoEssentials {
                 .afterTime(0.8, transfer(3))
 
                 //drop block
-                .afterTime(0.8, new SequentialAction(moveSlideHighBasket(), depositTransferAction(0.7), new SleepAction(0.15), openDeposit(), new SleepAction(0.35), depositTransferAction(0.5)))
+                .afterTime(0.8, new SequentialAction(moveSlideHighBasket(), depositTransferAction(0.7), new SleepAction(0.15), openDeposit(), new SleepAction(0.2), depositTransferAction(0.5)))
                 .strafeToLinearHeading(dropVector, dropAngle)
                 .build();
 
 
         Action end = drive.actionBuilder(dropPose)
-                .afterTime(0.5,moveSlidePark())
-                .afterTime(1, depositTransferAction(0.7))
-                .splineToLinearHeading(new Pose2d(-25, -10, Math.toRadians(180)), Math.toRadians(0))
+                .afterTime(0.1,moveSlideBottom())
+                .afterTime(1, depositTransferAction(0.5))
+                .splineToLinearHeading(new Pose2d(-25, -10, Math.toRadians(0)), Math.toRadians(0))
                 .waitSeconds(0.1)
                 .build();
 
@@ -120,6 +120,7 @@ public class sixSampleVisionFull extends atlantisAutoEssentials {
         depositTransfer.setPosition(0.4);
         intakeTransfer.setPosition(intakeTransferIn);
         intakeClawTilt.setPosition(0.85);
+        intakeClawWrist.setPosition(intakeWristVert);
         limelight.setPollRateHz(100);
         limelight.start();
 
@@ -195,7 +196,8 @@ public class sixSampleVisionFull extends atlantisAutoEssentials {
 
             // Telemetry data
 
-            telemetry.addLine("5 SAMPLE AUTO: 80 POINTS");
+            telemetry.addLine("     **RED SIDE**     ");
+            telemetry.addLine("6 SAMPLE AUTO: 96 POINTS");
             telemetry.addLine("ALIGN ROBOT SIDE WITH NET ZONE");
             telemetry.addLine(" ");
             telemetry.addData("5th Sample X", sample5X);
@@ -229,17 +231,27 @@ public class sixSampleVisionFull extends atlantisAutoEssentials {
                 new SequentialAction(
                         dropPreload,
                         block2,
-                        block3,
-                        block4,
-                        block5Sub,
-                        updateLimelight(0.2),
                         endPID()
                 ))
         );
 
 
-        TrajectoryActionBuilder block5PickDrop = drive.actionBuilder(new Pose2d(sample5X -25.5, sample5Y, Math.toRadians(0)))
-                .strafeToConstantHeading(new Vector2d(sample5X - 25.5, sample5Y + inchesToBlock))
+        Actions.runBlocking(
+                new ParallelAction( updatePidAction(),
+                        new SequentialAction(
+                                block3,
+                                block4,
+                                block5Sub,
+                                new SleepAction(0.15),
+                                updateLimelightNeural(color),
+                                endPID()
+                        ))
+        );
+       
+
+        Pose2d currPose = drive.pose;
+        TrajectoryActionBuilder block5PickDrop = drive.actionBuilder(currPose)
+                .strafeToConstantHeading(new Vector2d(currPose.position.x , currPose.position.y - inchesToBlock))
                 .stopAndAdd(new SequentialAction(new ParallelAction(horizSlideOut(true, ticksToBlock), moveWrist(clawPosBlock)), new SleepAction(0.1), clawPickup(), new SleepAction(0.5), closeIntake(), new SleepAction(0.25)))
 
                 //transfer
@@ -258,13 +270,15 @@ public class sixSampleVisionFull extends atlantisAutoEssentials {
                 new SequentialAction(
                         block5PickDrop.build(),
                         block6Sub,
-                        updateLimelight(0.2),
+                        new SleepAction(0.15),
+                        updateLimelightNeural(color),
+                        stopLimelight(),
                         endPID()
                 ))
                 );
 
-        TrajectoryActionBuilder block6PickDrop = drive.actionBuilder(new Pose2d(sample5X -25.5, sample5Y, Math.toRadians(0)))
-                .strafeToConstantHeading(new Vector2d(sample5X - 25.5, sample5Y + inchesToBlock))
+        TrajectoryActionBuilder block6PickDrop = drive.actionBuilder(currPose)
+                .strafeToConstantHeading(new Vector2d(currPose.position.x, currPose.position.y - inchesToBlock))
                 .stopAndAdd(new SequentialAction(new ParallelAction(horizSlideOut(true, ticksToBlock), moveWrist(clawPosBlock)), new SleepAction(0.1), clawPickup(), new SleepAction(0.5), closeIntake(), new SleepAction(0.25)))
 
                 //transfer
@@ -288,7 +302,8 @@ public class sixSampleVisionFull extends atlantisAutoEssentials {
                 ))
         );
 
-        limelight.stop();
+
+
 
     }
 

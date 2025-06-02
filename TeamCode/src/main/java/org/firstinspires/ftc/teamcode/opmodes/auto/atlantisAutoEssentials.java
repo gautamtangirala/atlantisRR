@@ -521,9 +521,9 @@ public class atlantisAutoEssentials extends LinearOpMode {
         }};
     }
 
-    public static Boolean isVertical(List<List<Double>> points) {
+    public double getLengthWidthRatio(List<List<Double>> points) {
         if (points.isEmpty()) {
-            return true; // Return true if there's no valid data
+            return 0; // Return 0 if there's no valid data
         }
 
         double minX = points.stream().mapToDouble(p -> p.get(0)).min().orElse(Double.NaN);
@@ -532,11 +532,23 @@ public class atlantisAutoEssentials extends LinearOpMode {
         double maxY = points.stream().mapToDouble(p -> p.get(1)).max().orElse(Double.NaN);
 
         if (Double.isNaN(minX) || Double.isNaN(maxX) || Double.isNaN(minY) || Double.isNaN(maxY)) {
-            return true; // If for some reason values are invalid, assume vertical
+            return 0; // If values are invalid, return 0
         }
 
-        return (maxY - minY) >= (maxX - minX); // True if vertical, False if horizontal
+        double length = maxY - minY;
+        double width = maxX - minX;
+
+        if (width == 0) {
+            return Double.MAX_VALUE; // Avoid division by zero
+        }
+
+        return length / width; // Return the length-to-width ratio
     }
+
+    public boolean isVertical(List<List<Double>> points) {
+        return getLengthWidthRatio(points) > 0.65; // Check if ratio is greater than 0.65
+    }
+
 
     public static int ticksToBlock = 480;
     public static double inchesToBlock = 0;
@@ -619,10 +631,9 @@ public class atlantisAutoEssentials extends LinearOpMode {
 
     public Action updateLimelightNeural(String color) {
         return new InstantAction(() -> {
-                result = limelight.getLatestResult();
-                List<LLResultTypes.DetectorResult> detections = result.getDetectorResults();
-                limelight.captureSnapshot("neuralPOV");
-
+            result = limelight.getLatestResult();
+            List<LLResultTypes.DetectorResult> detections = result.getDetectorResults();
+            limelight.captureSnapshot("neuralPOV");
 
             LLResultTypes.DetectorResult closestSample = null;
             double minDistance = Double.MAX_VALUE;
@@ -631,43 +642,47 @@ public class atlantisAutoEssentials extends LinearOpMode {
             for (LLResultTypes.DetectorResult detection : detections) {
                 if (Objects.equals(detection.getClassName(), "yellow") || Objects.equals(detection.getClassName(), color)) {
 
-
-                    // Define the weights for X and Y (1 means equal importance, >1 means more importance)
-                    double xWeight = 1;  // You can increase this if you want X to be more important
-                    double yWeight = 1.6;  // You can increase this if you want Y to be more important
+                    // Define the weights for X and Y
+                    double xWeight = 1;
+                    double yWeight = 1.6;
 
                     // Calculate the weighted distance
+                    double sampleLWR = getLengthWidthRatio(detection.getTargetCorners()); // Get LWR of the sample
+                    double lwrWeight = 1 + Math.abs(sampleLWR - 0.65); // Weight increases as LWR deviates from 0.65
+
                     double distance = Math.sqrt(
                             Math.pow((detection.getTargetXPixels() - targetPoint.x) * xWeight, 2) +
                                     Math.pow((detection.getTargetYPixels() - targetPoint.y) * yWeight, 2)
-                    );
+                    ) / lwrWeight; // Divide by LWR weight to prioritize samples farther from 0.65
 
-                    // Update closest sample
+                    // Compute ticksToBlock for the detection
+                    double y = detection.getTargetYPixels();
+                    int computedTicksToBlock = (int) (806.63 * Math.pow(0.991325, y));
+
+                    // Ensure ticksToBlock does not exceed 480
+                    if (computedTicksToBlock > 480) {
+                        continue; // Skip this detection
+                    }
+
+                    // Update closest sample if distance is smaller
                     if (distance < minDistance) {
                         minDistance = distance;
                         closestSample = detection;
                     }
-
                 }
             }
 
+            if (closestSample != null) {
+                double x = closestSample.getTargetXPixels();
+                double y = closestSample.getTargetYPixels();
 
-            double x = closestSample.getTargetXPixels();
-            double y = closestSample.getTargetYPixels();
-
-            inchesToBlock = (0.0521189*x) - 13.39114;
-                ticksToBlock = (int) (806.63 * Math.pow(0.991325,y));
-            vertical = isVertical(closestSample.getTargetCorners());
-            clawPosBlock = vertical ? intakeWristVert : intakeWristHoriz;
-
-
-
-
-
-
-
-
+                inchesToBlock = (0.0521189 * x) - 13.39114;
+                ticksToBlock = (int) (806.63 * Math.pow(0.991325, y));
+                vertical = isVertical(closestSample.getTargetCorners());
+                clawPosBlock = vertical ? intakeWristVert : intakeWristHoriz;
+            }
         });
+
     }
 
 

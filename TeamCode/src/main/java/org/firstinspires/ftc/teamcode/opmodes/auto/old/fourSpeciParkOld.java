@@ -125,7 +125,7 @@ public class fourSpeciParkOld extends atlantisAutoEssentials {
                 .build();
 
         depositGrab(depositClawClose);
-        depositTransfer.setPosition(0.5);
+        depositTransfer.setPosition(0.4);
         intakeTransfer.setPosition(intakeTransferIn);
 
         telemetry.addLine("4 SPECIMEN AUTO + PARK: 83 POINTS");
